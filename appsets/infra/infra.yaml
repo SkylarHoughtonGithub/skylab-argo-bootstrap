@@ -13,7 +13,7 @@ spec:
             matchLabels:
               deploy-infrastructure: "true"
       - git:
-          repoURL: https://github.com/SkylarHoughtonGithub/skylab-argo-bootstrap
+          repoURL: https://github.com/SkylarHoughtonGithub/skylab-argo-workloads
           revision: HEAD
           directories:
           - path: infra/*
