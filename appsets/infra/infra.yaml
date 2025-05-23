@@ -1,23 +1,19 @@
 apiVersion: argoproj.io/v1alpha1
 kind: ApplicationSet
 metadata:
-  name: infra-clean
+  name: infra
   namespace: argocd
 spec:
   generators:
-  - clusters:
-      selector:
-        matchLabels:
-          deploy-infra: "true"
   - git:
       repoURL: https://github.com/SkylarHoughtonGithub/skylab-argo-workloads
       revision: HEAD
       directories:
       - path: infra/*
       values:
-        clusterName: '{{cluster.name}}'
-        clusterServer: '{{cluster.server}}'
-        environment: '{{cluster.metadata.labels.environment}}'
+        clusterName: argo-cluster
+        clusterServer: https://kubernetes.default.svc
+        environment: dev
   template:
     metadata:
       name: '{{values.clusterName}}-{{values.environment}}-{{path.basename}}'
