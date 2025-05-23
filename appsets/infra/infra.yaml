@@ -5,28 +5,42 @@ metadata:
   namespace: argocd
 spec:
   generators:
+  # Development cluster
   - git:
       repoURL: https://github.com/SkylarHoughtonGithub/skylab-argo-workloads
       revision: HEAD
       directories:
       - path: infra/*
-  # When you add more clusters, add more generators
+      values:
+        clusterName: in-cluster
+        clusterServer: https://kubernetes.default.svc
+        environment: dev
+  # When you add staging cluster, uncomment and configure:
   # - git:
   #     repoURL: https://github.com/SkylarHoughtonGithub/skylab-argo-workloads
   #     revision: HEAD
   #     directories:
   #     - path: infra/*
-  #   template:
-  #     metadata:
-  #       name: 'staging-{{path.basename}}'
-  #     destination:
-  #       server: https://staging-cluster.example.com
+  #     values:
+  #       clusterName: staging
+  #       clusterServer: https://staging-cluster.example.com
+  #       environment: staging
+  # When you add production cluster:
+  # - git:
+  #     repoURL: https://github.com/SkylarHoughtonGithub/skylab-argo-workloads
+  #     revision: HEAD
+  #     directories:
+  #     - path: infra/*
+  #     values:
+  #       clusterName: production
+  #       clusterServer: https://production-cluster.example.com
+  #       environment: production
   template:
     metadata:
-      name: 'in-cluster-{{path.basename}}'
+      name: '{{values.clusterName}}-{{values.environment}}-{{path.basename}}'
       labels:
-        cluster: in-cluster
-        environment: dev
+        cluster: '{{values.clusterName}}'
+        environment: '{{values.environment}}'
         component: infra
         service: '{{path.basename}}'
     spec:
@@ -34,9 +48,9 @@ spec:
       source:
         repoURL: https://github.com/SkylarHoughtonGithub/skylab-argo-workloads
         targetRevision: HEAD
-        path: '{{path}}/dev'
+        path: '{{path}}/{{values.environment}}'
       destination:
-        server: https://kubernetes.default.svc
+        server: '{{values.clusterServer}}'
         namespace: '{{path.basename}}'
       syncPolicy:
         automated:
