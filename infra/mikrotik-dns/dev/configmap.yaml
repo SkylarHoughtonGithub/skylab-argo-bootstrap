@@ -1,0 +1,160 @@
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: mikrotik-dns-updater
+  namespace: kube-system
+data:
+  update-dns.py: |
+    #!/usr/bin/env python3
+    import requests
+    import json
+    import os
+    import time
+    import logging
+    from kubernetes import client, config, watch
+    
+    # Configure logging
+    logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
+    logger = logging.getLogger(__name__)
+    
+    # MikroTik configuration
+    MIKROTIK_HOST = os.getenv('MIKROTIK_HOST', '192.168.50.1')
+    MIKROTIK_USER = os.getenv('MIKROTIK_USER', 'admin')
+    MIKROTIK_PASS = os.getenv('MIKROTIK_PASS', 'password')
+    LOAD_BALANCER_IP = os.getenv('LOAD_BALANCER_IP', '192.168.50.38')
+    
+    class MikroTikDNSManager:
+        def __init__(self, host, username, password):
+            self.host = host
+            self.username = username
+            self.password = password
+            self.session = requests.Session()
+            self.session.verify = False  # Disable SSL verification for local router
+            
+        def login(self):
+            """Login to MikroTik router"""
+            try:
+                url = f"https://{self.host}/rest/login"
+                response = self.session.post(url, json={
+                    "name": self.username,
+                    "password": self.password
+                })
+                if response.status_code == 200:
+                    logger.info("Successfully logged into MikroTik")
+                    return True
+                else:
+                    logger.error(f"Failed to login to MikroTik: {response.status_code}")
+                    return False
+            except Exception as e:
+                logger.error(f"Exception during MikroTik login: {e}")
+                return False
+    
+        def add_dns_record(self, hostname, ip_address):
+            """Add a DNS record to MikroTik"""
+            try:
+                url = f"https://{self.host}/rest/ip/dns/static"
+                data = {
+                    "name": hostname,
+                    "address": ip_address,
+                    "ttl": "1h"
+                }
+                response = self.session.put(url, json=data)
+                if response.status_code in [200, 201]:
+                    logger.info(f"Added DNS record: {hostname} -> {ip_address}")
+                    return True
+                else:
+                    logger.error(f"Failed to add DNS record: {response.status_code}")
+                    return False
+            except Exception as e:
+                logger.error(f"Exception adding DNS record: {e}")
+                return False
+    
+        def remove_dns_record(self, hostname):
+            """Remove a DNS record from MikroTik"""
+            try:
+                # First, find the record ID
+                url = f"https://{self.host}/rest/ip/dns/static"
+                response = self.session.get(url)
+                if response.status_code == 200:
+                    records = response.json()
+                    for record in records:
+                        if record.get('name') == hostname:
+                            record_id = record.get('.id')
+                            delete_url = f"https://{self.host}/rest/ip/dns/static/{record_id}"
+                            delete_response = self.session.delete(delete_url)
+                            if delete_response.status_code == 200:
+                                logger.info(f"Removed DNS record: {hostname}")
+                                return True
+                    logger.warning(f"DNS record not found: {hostname}")
+                    return False
+                else:
+                    logger.error(f"Failed to fetch DNS records: {response.status_code}")
+                    return False
+            except Exception as e:
+                logger.error(f"Exception removing DNS record: {e}")
+                return False
+    
+    class IngressWatcher:
+        def __init__(self, dns_manager):
+            self.dns_manager = dns_manager
+            # Load Kubernetes config
+            try:
+                config.load_incluster_config()
+            except:
+                config.load_kube_config()
+            self.v1 = client.NetworkingV1Api()
+            
+        def watch_ingresses(self):
+            """Watch for Ingress changes and update DNS accordingly"""
+            logger.info("Starting Ingress watcher...")
+            w = watch.Watch()
+            
+            while True:
+                try:
+                    for event in w.stream(self.v1.list_ingress_for_all_namespaces):
+                        event_type = event['type']
+                        ingress = event['object']
+                        
+                        # Check if this ingress has the annotation to manage DNS
+                        annotations = ingress.metadata.annotations or {}
+                        if annotations.get('dns-controller/manage-dns') != 'true':
+                            continue
+                            
+                        # Extract hostname from ingress rules
+                        if ingress.spec.rules:
+                            for rule in ingress.spec.rules:
+                                hostname = rule.host
+                                if hostname:
+                                    if event_type in ['ADDED', 'MODIFIED']:
+                                        logger.info(f"Ingress {event_type}: {hostname}")
+                                        self.dns_manager.add_dns_record(hostname, LOAD_BALANCER_IP)
+                                    elif event_type == 'DELETED':
+                                        logger.info(f"Ingress DELETED: {hostname}")
+                                        self.dns_manager.remove_dns_record(hostname)
+                                        
+                except Exception as e:
+                    logger.error(f"Error in watch loop: {e}")
+                    time.sleep(10)  # Wait before retrying
+    
+    def main():
+        logger.info("Starting MikroTik DNS Controller")
+        
+        # Initialize MikroTik DNS manager
+        dns_manager = MikroTikDNSManager(MIKROTIK_HOST, MIKROTIK_USER, MIKROTIK_PASS)
+        
+        # Login to MikroTik
+        if not dns_manager.login():
+            logger.error("Failed to login to MikroTik. Exiting.")
+            return
+            
+        # Start watching ingresses
+        watcher = IngressWatcher(dns_manager)
+        watcher.watch_ingresses()
+    
+    if __name__ == "__main__":
+        main()
+
+  requirements.txt: |
+    kubernetes==27.2.0
+    requests==2.31.0

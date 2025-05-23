@@ -1,0 +1,7 @@
+server:
+  config:
+    configManagementPlugins: |
+      - name: sops
+        generate:
+          command: ["sh", "-c"]
+          args: ["sops -d $ARGOCD_APP_SOURCE_PATH/secrets.enc.yaml"]
