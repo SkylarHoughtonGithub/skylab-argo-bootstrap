@@ -11,13 +11,12 @@ spec:
       directories:
       - path: infra/*
       values:
-        clusterName: argo-cluster
+        clusterName: argo-lab
         clusterServer: https://kubernetes.default.svc
         environment: dev
-        location: lab
   template:
     metadata:
-      name: '{{values.clusterName}}-{{values.location}}-{{values.environment}}-{{path.basename}}'
+      name: '{{values.clusterName}}-{{path.basename}}-{{values.environment}}'
       labels:
         cluster: '{{values.clusterName}}'
         environment: '{{values.environment}}'
