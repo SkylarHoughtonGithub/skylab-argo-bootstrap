@@ -1,0 +1,29 @@
+external-secrets:
+  # External Secrets Operator configuration
+  replicaCount: 1
+  
+  installCRDs: true
+  
+  resources:
+    limits:
+      cpu: 100m
+      memory: 128Mi
+    requests:
+      cpu: 50m
+      memory: 64Mi
+  
+  securityContext:
+    allowPrivilegeEscalation: false
+    readOnlyRootFilesystem: true
+    runAsNonRoot: true
+    runAsUser: 65534
+    capabilities:
+      drop:
+      - ALL
+  
+  serviceMonitor:
+    enabled: false  # Enable in production
+  
+  webhook:
+    create: true
+    port: 9443
