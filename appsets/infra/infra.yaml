@@ -1,5 +1,3 @@
-
-# Dynamic version without hardcoded cluster names
 apiVersion: argoproj.io/v1alpha1
 kind: ApplicationSet
 metadata:
@@ -13,10 +11,9 @@ spec:
       directories:
       - path: infra/*
       values:
-        # Get cluster info from the cluster where ArgoCD is running
-        clusterName: "{{cluster.name}}"
-        clusterServer: "{{cluster.server}}"
-        environment: "{{cluster.metadata.labels.environment}}"
+        clusterName: in-cluster
+        clusterServer: https://kubernetes.default.svc
+        environment: dev
   template:
     metadata:
       name: '{{values.clusterName}}-{{values.environment}}-{{path.basename}}'
