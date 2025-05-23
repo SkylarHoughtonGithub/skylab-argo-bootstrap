@@ -5,25 +5,28 @@ metadata:
   namespace: argocd
 spec:
   generators:
-  - merge:
-      mergeKeys:
-        - path.basename
-      generators:
-      - clusters:
-          selector:
-            matchLabels:
-              deploy-infra: "true"
-      - git:
-          repoURL: https://github.com/SkylarHoughtonGithub/skylab-argo-workloads
-          revision: HEAD
-          directories:
-          - path: infra/*
+  - git:
+      repoURL: https://github.com/SkylarHoughtonGithub/skylab-argo-workloads
+      revision: HEAD
+      directories:
+      - path: infra/*
+  # When you add more clusters, add more generators
+  # - git:
+  #     repoURL: https://github.com/SkylarHoughtonGithub/skylab-argo-workloads
+  #     revision: HEAD
+  #     directories:
+  #     - path: infra/*
+  #   template:
+  #     metadata:
+  #       name: 'staging-{{path.basename}}'
+  #     destination:
+  #       server: https://staging-cluster.example.com
   template:
     metadata:
-      name: '{{cluster.name}}-{{path.basename}}'
+      name: 'in-cluster-{{path.basename}}'
       labels:
-        cluster: '{{cluster.name}}'
-        environment: '{{cluster.metadata.labels.environment}}'
+        cluster: in-cluster
+        environment: dev
         component: infra
         service: '{{path.basename}}'
     spec:
@@ -31,9 +34,9 @@ spec:
       source:
         repoURL: https://github.com/SkylarHoughtonGithub/skylab-argo-workloads
         targetRevision: HEAD
-        path: '{{path}}/{{cluster.metadata.labels.environment}}'
+        path: '{{path}}/dev'
       destination:
-        server: '{{cluster.server}}'
+        server: https://kubernetes.default.svc
         namespace: '{{path.basename}}'
       syncPolicy:
         automated:
