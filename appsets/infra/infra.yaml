@@ -1,4 +1,3 @@
-# Test with clusters generator only first
 apiVersion: argoproj.io/v1alpha1
 kind: ApplicationSet
 metadata:
@@ -6,23 +5,33 @@ metadata:
   namespace: argocd
 spec:
   generators:
-  - list:
-      elements:
-      - cluster: in-cluster
-        server: https://kubernetes.default.svc
-        environment: dev
+  - merge:
+      mergeKeys:
+        - path.basename
+      generators:
+      - clusters:
+          selector:
+            matchLabels:
+              deploy-infra: "true"
+      - git:
+          repoURL: https://github.com/SkylarHoughtonGithub/skylab-argo-workloads
+          revision: HEAD
+          directories:
+          - path: infra/*
   template:
     metadata:
-      name: 'test-{{cluster.name}}'
+      name: '{{cluster.name}}-{{path.basename}}'
       labels:
         cluster: '{{cluster.name}}'
         environment: '{{cluster.metadata.labels.environment}}'
+        component: infra
+        service: '{{path.basename}}'
     spec:
       project: default
       source:
         repoURL: https://github.com/SkylarHoughtonGithub/skylab-argo-workloads
         targetRevision: HEAD
-        path: infra/nginx-raw/{{cluster.metadata.labels.environment}}
+        path: '{{path}}/{{cluster.metadata.labels.environment}}'
       destination:
         server: '{{cluster.server}}'
         namespace: '{{path.basename}}'
@@ -32,3 +41,4 @@ spec:
           selfHeal: true
         syncOptions:
           - CreateNamespace=true
+          - ServerSideApply=true
