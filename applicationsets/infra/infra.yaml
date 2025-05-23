@@ -1,0 +1,43 @@
+---
+apiVersion: argoproj.io/v1alpha1
+kind: ApplicationSet
+metadata:
+  name: infra
+  namespace: argocd
+spec:
+  generators:
+  - matrix:
+      generators:
+      - clusters:
+          selector:
+            matchLabels:
+              deploy-infrastructure: "true"
+      - git:
+          repoURL: https://github.com/SkylarHoughtonGithub/skylab-argo-bootstrap
+          revision: HEAD
+          directories:
+          - path: infra/*
+  template:
+    metadata:
+      name: '{{cluster.name}}-{{path.basename}}'
+      labels:
+        cluster: '{{cluster.name}}'
+        environment: '{{cluster.metadata.labels.environment}}'
+        component: infra
+        service: '{{path.basename}}'
+    spec:
+      project: default
+      source:
+        repoURL: https://github.com/SkylarHoughtonGithub/skylab-argo-bootstrap
+        targetRevision: HEAD
+        path: '{{path}}/{{cluster.metadata.labels.environment}}'
+      destination:
+        server: '{{cluster.server}}'
+        namespace: '{{path.basename}}'
+      syncPolicy:
+        automated:
+          prune: true
+          selfHeal: true
+        syncOptions:
+          - CreateNamespace=true
+          - ServerSideApply=true
