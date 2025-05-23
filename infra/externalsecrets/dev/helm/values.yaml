@@ -1,0 +1,56 @@
+# External Secrets Operator Helm Values
+replicaCount: 1
+
+image:
+  repository: ghcr.io/external-secrets/external-secrets
+  tag: v0.9.11
+  pullPolicy: IfNotPresent
+
+# Service Account configuration (no IRSA)
+serviceAccount:
+  create: true
+  name: external-secrets
+
+# Resources
+resources:
+  limits:
+    cpu: 100m
+    memory: 128Mi
+  requests:
+    cpu: 10m
+    memory: 64Mi
+
+# Security context
+securityContext:
+  allowPrivilegeEscalation: false
+  readOnlyRootFilesystem: true
+  runAsNonRoot: true
+  runAsUser: 65534
+  capabilities:
+    drop:
+    - ALL
+
+# Pod security context
+podSecurityContext:
+  fsGroup: 65534
+
+# Environment variables for AWS region
+env:
+  - name: AWS_REGION
+    value: "us-east-1"  # Change to your region
+
+# Webhook configuration
+webhook:
+  create: true
+  port: 9443
+  
+# Cert controller
+certController:
+  create: true
+
+# Metrics
+serviceMonitor:
+  enabled: false
+
+# Leader election
+leaderElect: true
