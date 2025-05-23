@@ -1,0 +1,48 @@
+apiVersion: argoproj.io/v1alpha1
+kind: ApplicationSet
+metadata:
+  name: infra-list
+  namespace: argocd
+spec:
+  generators:
+  - list:
+      elements:
+      - cluster: in-cluster
+        server: https://kubernetes.default.svc
+        environment: dev
+        app: nginx-helm
+        path: infra/nginx-helm
+      - cluster: in-cluster
+        server: https://kubernetes.default.svc
+        environment: dev
+        app: nginx-raw
+        path: infra/nginx-raw
+      - cluster: in-cluster
+        server: https://kubernetes.default.svc
+        environment: dev
+        app: redis-kustomize
+        path: infra/redis-kustomize
+  template:
+    metadata:
+      name: '{{cluster}}-{{app}}'
+      labels:
+        cluster: '{{cluster}}'
+        environment: '{{environment}}'
+        component: infra
+        service: '{{app}}'
+    spec:
+      project: default
+      source:
+        repoURL: https://github.com/SkylarHoughtonGithub/skylab-argo-workloads
+        targetRevision: HEAD
+        path: '{{path}}/{{environment}}'
+      destination:
+        server: '{{server}}'
+        namespace: '{{app}}'
+      syncPolicy:
+        automated:
+          prune: true
+          selfHeal: true
+        syncOptions:
+          - CreateNamespace=true
+          - ServerSideApply=true
