@@ -2,14 +2,15 @@
 apiVersion: argoproj.io/v1alpha1
 kind: ApplicationSet
 metadata:
-  name: infra-test
+  name: infra
   namespace: argocd
 spec:
   generators:
-  - clusters:
-      selector:
-        matchLabels:
-          deploy-infra: "true"
+  - list:
+      elements:
+      - cluster: in-cluster
+        server: https://kubernetes.default.svc
+        environment: dev
   template:
     metadata:
       name: 'test-{{cluster.name}}'
