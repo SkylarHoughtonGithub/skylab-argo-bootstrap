@@ -1,0 +1,10 @@
+---
+apiVersion: v2
+name: test-nginx-helm
+description: Test NGINX using remote Helm chart
+version: 1.0.0
+
+dependencies:
+- name: nginx
+  version: "15.4.4"
+  repository: "https://charts.bitnami.com/bitnami"
