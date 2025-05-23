@@ -14,9 +14,10 @@ spec:
         clusterName: argo-cluster
         clusterServer: https://kubernetes.default.svc
         environment: dev
+        location: lab
   template:
     metadata:
-      name: '{{values.clusterName}}-{{values.environment}}-{{path.basename}}'
+      name: '{{values.clusterName}}-{{values.location}}-{{values.environment}}-{{path.basename}}'
       labels:
         cluster: '{{values.clusterName}}'
         environment: '{{values.environment}}'
