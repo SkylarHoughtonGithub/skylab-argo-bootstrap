@@ -1,0 +1,17 @@
+---
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+namespace: ceph-operator
+
+resources:
+  - manifests/namespace.yaml
+
+helmCharts:
+  - name: rook-ceph
+    repo: https://charts.rook.io/release
+    version: v1.12.8
+    releaseName: rook-ceph
+    namespace: ceph-operator
+    valuesFile: values.yaml
+

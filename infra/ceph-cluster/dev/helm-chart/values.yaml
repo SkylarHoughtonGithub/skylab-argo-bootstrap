@@ -1,0 +1,317 @@
+---
+operatorNamespace: ceph-operator
+
+# Cluster configuration
+cephClusterSpec:
+  # Ceph version
+  cephVersion:
+    image: quay.io/ceph/ceph:v17.2.6
+    allowUnsupported: false
+  
+  # Data directory on host
+  dataDirHostPath: /var/lib/rook
+  
+  # Skip upgrade checks (homelab)
+  skipUpgradeChecks: false
+  
+  # Continue if devices are not available
+  continueUpgradeAfterChecksEvenIfNotHealthy: false
+  
+  # Wait timeout
+  waitTimeoutForHealthyOSDInMinutes: 10
+  
+  # Monitor configuration (odd numbers: 1, 3, 5)
+  mon:
+    count: 3
+    allowMultiplePerNode: false
+  
+  # Manager configuration
+  mgr:
+    count: 2
+    allowMultiplePerNode: false
+    modules:
+      - name: pg_autoscaler
+        enabled: true
+      - name: rook
+        enabled: true
+  
+  # Dashboard configuration
+  dashboard:
+    enabled: true
+    port: 8443
+    ssl: true
+  
+  # Monitoring
+  monitoring:
+    enabled: true
+    createPrometheusRules: true
+  
+  # Network configuration
+  network:
+    provider: host
+    # For multiple networks:
+    # connections:
+    #   encryption:
+    #     enabled: false
+    #   compression:
+    #     enabled: false
+  
+  # Crash collector
+  crashCollector:
+    disable: false
+  
+  # Log collector  
+  logCollector:
+    enabled: true
+    periodicity: daily
+    maxLogSize: 500M
+  
+  # Clean up policy
+  cleanupPolicy:
+    confirmation: ""
+    sanitizeDisks:
+      method: quick
+      dataSource: zero
+      iteration: 1
+    allowUninstallWithVolumes: false
+  
+  # Storage configuration
+  storage:
+    useAllNodes: false
+    useAllDevices: false
+    nodes:
+    - name: "worker1"
+      config:
+        storeType: bluestore
+      directories:
+      - path: "/var/lib/rook/storage"
+    - name: "worker2"
+      config:
+        storeType: bluestore
+      directories:
+      - path: "/var/lib/rook/storage"
+    - name: "worker3"
+      config:
+        storeType: bluestore
+      directories:
+      - path: "/var/lib/rook/storage"
+  
+  # Placement configuration for homelab
+  placement:
+    all:
+      tolerations:
+      - key: storage-node
+        operator: Exists
+      # nodeAffinity:
+      #   requiredDuringSchedulingIgnoredDuringExecution:
+      #     nodeSelectorTerms:
+      #     - matchExpressions:
+      #       - key: role
+      #         operator: In
+      #         values:
+      #         - storage-node
+    mon:
+      podAntiAffinity:
+        preferredDuringSchedulingIgnoredDuringExecution:
+        - weight: 100
+          podAffinityTerm:
+            labelSelector:
+              matchExpressions:
+              - key: app
+                operator: In
+                values:
+                - rook-ceph-mon
+            topologyKey: kubernetes.io/hostname
+    osd:
+      podAntiAffinity:
+        preferredDuringSchedulingIgnoredDuringExecution:
+        - weight: 100
+          podAffinityTerm:
+            labelSelector:
+              matchExpressions:
+              - key: app
+                operator: In
+                values:
+                - rook-ceph-osd
+            topologyKey: kubernetes.io/hostname
+    mgr:
+      podAntiAffinity:
+        preferredDuringSchedulingIgnoredDuringExecution:
+        - weight: 100
+          podAffinityTerm:
+            labelSelector:
+              matchExpressions:
+              - key: app
+                operator: In
+                values:
+                - rook-ceph-mgr
+            topologyKey: kubernetes.io/hostname
+
+  # Resource specifications
+  resources:
+    mon:
+      requests:
+        cpu: 100m
+        memory: 1Gi
+      limits:
+        cpu: 200m
+        memory: 2Gi
+    osd:
+      requests:
+        cpu: 100m
+        memory: 2Gi
+      limits:
+        cpu: 500m
+        memory: 4Gi
+    mgr:
+      requests:
+        cpu: 100m
+        memory: 512Mi
+      limits:
+        cpu: 200m
+        memory: 1Gi
+    prepareosd:
+      requests:
+        cpu: 100m
+        memory: 50Mi
+      limits:
+        cpu: 200m
+        memory: 100Mi
+    crashcollector:
+      requests:
+        cpu: 10m
+        memory: 60Mi
+      limits:
+        cpu: 100m
+        memory: 60Mi
+    logcollector:
+      requests:
+        cpu: 100m
+        memory: 100Mi
+      limits:
+        cpu: 1000m
+        memory: 1Gi
+    cleanup:
+      requests:
+        cpu: 250m
+        memory: 100Mi
+      limits:
+        cpu: 500m
+        memory: 1Gi
+
+# Pool configuration
+cephBlockPools:
+  - name: ceph-blockpool
+    spec:
+      failureDomain: host
+      replicated:
+        size: 3  # Adjust based on your node count
+        requireSafeReplicaSize: true
+        replicasPerFailureDomain: 1
+        subFailureDomain: osd
+    storageClass:
+      enabled: true
+      name: rook-ceph-block
+      isDefault: false
+      reclaimPolicy: Delete
+      allowVolumeExpansion: true
+      volumeBindingMode: Immediate
+      parameters:
+        imageFormat: "2"
+        imageFeatures: layering
+        csi.storage.k8s.io/provisioner-secret-name: rook-csi-rbd-provisioner
+        csi.storage.k8s.io/provisioner-secret-namespace: "{{ .Release.Namespace }}"
+        csi.storage.k8s.io/node-stage-secret-name: rook-csi-rbd-node
+        csi.storage.k8s.io/node-stage-secret-namespace: "{{ .Release.Namespace }}"
+        csi.storage.k8s.io/controller-expand-secret-name: rook-csi-rbd-provisioner
+        csi.storage.k8s.io/controller-expand-secret-namespace: "{{ .Release.Namespace }}"
+
+# File system configuration (optional)
+cephFileSystems:
+  - name: ceph-filesystem
+    spec:
+      metadataPool:
+        replicated:
+          size: 3
+      dataPools:
+        - name: data0
+          failureDomain: host
+          replicated:
+            size: 3
+      metadataServer:
+        activeCount: 1
+        activeStandby: true
+        resources:
+          requests:
+            cpu: 100m
+            memory: 1Gi
+          limits:
+            cpu: 1000m
+            memory: 4Gi
+    storageClass:
+      enabled: true
+      name: rook-cephfs
+      pool: data0
+      reclaimPolicy: Delete
+      allowVolumeExpansion: true
+      volumeBindingMode: Immediate
+      parameters:
+        csi.storage.k8s.io/provisioner-secret-name: rook-csi-cephfs-provisioner
+        csi.storage.k8s.io/provisioner-secret-namespace: "{{ .Release.Namespace }}"
+        csi.storage.k8s.io/node-stage-secret-name: rook-csi-cephfs-node
+        csi.storage.k8s.io/node-stage-secret-namespace: "{{ .Release.Namespace }}"
+        csi.storage.k8s.io/controller-expand-secret-name: rook-csi-cephfs-provisioner
+        csi.storage.k8s.io/controller-expand-secret-namespace: "{{ .Release.Namespace }}"
+
+# Object store configuration (optional)
+cephObjectStores:
+  - name: ceph-objectstore
+    spec:
+      metadataPool:
+        failureDomain: host
+        replicated:
+          size: 3
+      dataPool:
+        failureDomain: host
+        replicated:
+          size: 3
+      preservePoolsOnDelete: true
+      gateway:
+        port: 80
+        resources:
+          requests:
+            cpu: 100m
+            memory: 128Mi
+          limits:
+            cpu: 2000m
+            memory: 2Gi
+        instances: 1
+        priorityClassName: system-cluster-critical
+    storageClass:
+      enabled: true
+      name: rook-ceph-bucket
+      reclaimPolicy: Delete
+      volumeBindingMode: Immediate
+      parameters:
+        region: us-east-1
+
+# Ingress for Ceph Dashboard (optional)
+ingress:
+  dashboard:
+    enabled: true
+    ingressClassName: traefik
+    annotations:
+      cert-manager.io/cluster-issuer: "step-ca-issuer"
+      traefik.ingress.kubernetes.io/router.tls: "true"
+    host:
+      name: ceph-dashboard.local
+      path: /
+    tls:
+    - hosts:
+      - ceph-dashboard.local
+      secretName: ceph-dashboard-tls
+
+# Monitoring (Prometheus integration)
+monitoring:
+  enabled: true
+  createPrometheusRules: true
