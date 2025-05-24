@@ -13,5 +13,5 @@ helmCharts:
     version: v1.12.8
     releaseName: rook-ceph-cluster
     namespace: ceph-cluster
-    valuesFile: values.yaml
+    valuesFile: helm-chart/values.yaml
     includeCRDs: true

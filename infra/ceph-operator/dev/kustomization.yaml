@@ -13,5 +13,5 @@ helmCharts:
     version: v1.12.8
     releaseName: rook-ceph
     namespace: ceph-operator
-    valuesFile: values.yaml
+    valuesFile: helm-chart/values.yaml
 
