@@ -41,11 +41,6 @@ cephClusterSpec:
     port: 8443
     ssl: true
   
-  # Monitoring
-  monitoring:
-    enabled: true
-    createPrometheusRules: true
-  
   # Network configuration
   network:
     provider: host
