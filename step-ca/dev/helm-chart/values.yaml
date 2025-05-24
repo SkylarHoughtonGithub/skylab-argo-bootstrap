@@ -1,0 +1,43 @@
+
+---
+step-certificates:
+  ca:
+    name: "Homelab CA"
+    address: ":9000"
+    dns: "step-ca.step-ca.svc.cluster.local,step-ca.homelab.local"
+    url: "https://step-ca.step-ca.svc.cluster.local:9000"
+    
+  provisioners:
+    - name: acme
+      type: ACME
+      
+  persistence:
+    enabled: true
+    size: 10Gi
+    storageClass: "rook-ceph-block"
+    
+  service:
+    type: ClusterIP
+    port: 9000
+    
+  ingress:
+    enabled: true
+    className: traefik
+    annotations:
+      cert-manager.io/cluster-issuer: "step-ca-issuer"
+      traefik.ingress.kubernetes.io/router.tls: "true"
+      traefik.ingress.kubernetes.io/router.middlewares: default-secure-headers@kubernetescrd
+    hosts:
+      - host: step-ca.homelab.local
+        paths:
+          - path: /
+            pathType: Prefix
+    tls:
+      - secretName: step-ca-tls
+        hosts:
+          - step-ca.homelab.local
+
+  bootstrap:
+    enabled: true
+    configmaps: true
+    secrets: true
