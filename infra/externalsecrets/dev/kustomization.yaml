@@ -9,6 +9,7 @@ helmCharts:
 - name: external-secrets
   version: 0.9.11
   repo: https://charts.external-secrets.io
+  releaseName: es
   valuesFile: helm-chart/values.yaml
   namespace: external-secrets-system
   includeCRDs: true
