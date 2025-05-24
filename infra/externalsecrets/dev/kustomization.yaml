@@ -4,9 +4,6 @@ kind: Kustomization
 
 namespace: external-secrets-system
 
-resources:
-- manifests/cluster-secret-store.yaml
-
 # Deploy External Secrets Operator via Helm
 helmCharts:
 - name: external-secrets
