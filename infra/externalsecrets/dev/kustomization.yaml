@@ -6,8 +6,6 @@ namespace: external-secrets
 
 resources:
 - manifests/cluster-secret-store.yaml
-- manifests/external-secret.yaml
-- manifests/secret-store-rbac.yaml
 
 # Deploy External Secrets Operator via Helm
 helmCharts:
@@ -18,8 +16,7 @@ helmCharts:
   namespace: external-secrets
   includeCRDs: true
 
-# Add common labels
-commonLabels:
+labels:
   app.kubernetes.io/name: external-secrets
   app.kubernetes.io/component: secrets-management
   environment: dev
