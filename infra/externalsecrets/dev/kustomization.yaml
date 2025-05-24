@@ -16,7 +16,8 @@ helmCharts:
   namespace: external-secrets
   includeCRDs: true
 
-labels:
+# Add common labels
+commonLabels:
   app.kubernetes.io/name: external-secrets
   app.kubernetes.io/component: secrets-management
   environment: dev
