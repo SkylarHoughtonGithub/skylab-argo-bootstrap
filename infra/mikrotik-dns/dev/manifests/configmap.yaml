@@ -44,8 +44,9 @@ data:
                 )
                 
                 # Test connection by getting system identity
-                identity = self.api(cmd='/system/identity/print')
-                logger.info(f"Successfully connected to MikroTik: {identity[0].get('name', 'Unknown')}")
+                identity = list(self.api(cmd='/system/identity/print'))
+                router_name = identity[0].get('name', 'Unknown') if identity else 'Unknown'
+                logger.info(f"Successfully connected to MikroTik: {router_name}")
                 return True
                 
             except Exception as e:
@@ -64,7 +65,7 @@ data:
         def get_dns_records(self):
             """Get all DNS static records"""
             try:
-                records = self.api(cmd='/ip/dns/static/print')
+                records = list(self.api(cmd='/ip/dns/static/print'))
                 return records
             except Exception as e:
                 logger.error(f"Failed to get DNS records: {e}")
