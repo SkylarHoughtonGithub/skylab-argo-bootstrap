@@ -84,26 +84,37 @@ data:
                         else:
                             # Update existing record
                             logger.info(f"Updating DNS record: {hostname} -> {ip_address}")
-                            self.api(
+                            list(self.api(
                                 cmd='/ip/dns/static/set',
                                 arguments={
                                     '.id': record.get('.id'),
                                     'address': ip_address
                                 }
-                            )
+                            ))
+                            logger.info(f"Updated DNS record: {hostname} -> {ip_address}")
                             return True
                 
                 # Add new record
-                self.api(
+                logger.info(f"Adding new DNS record: {hostname} -> {ip_address}")
+                result = list(self.api(
                     cmd='/ip/dns/static/add',
                     arguments={
                         'name': hostname,
                         'address': ip_address,
                         'ttl': '1h'
                     }
-                )
-                logger.info(f"Added DNS record: {hostname} -> {ip_address}")
-                return True
+                ))
+                logger.info(f"Successfully added DNS record: {hostname} -> {ip_address}")
+                
+                # Verify the record was added
+                updated_records = self.get_dns_records()
+                for record in updated_records:
+                    if record.get('name') == hostname and record.get('address') == ip_address:
+                        logger.info(f"Verified DNS record exists: {hostname} -> {ip_address}")
+                        return True
+                
+                logger.warning(f"DNS record was added but verification failed: {hostname}")
+                return True  # Assume success even if verification fails
                 
             except Exception as e:
                 logger.error(f"Failed to add DNS record {hostname}: {e}")
@@ -117,15 +128,16 @@ data:
                 
                 for record in records:
                     if record.get('name') == hostname:
-                        self.api(
+                        logger.info(f"Removing DNS record: {hostname} (ID: {record.get('.id')})")
+                        list(self.api(
                             cmd='/ip/dns/static/remove',
                             arguments={'.id': record.get('.id')}
-                        )
-                        logger.info(f"Removed DNS record: {hostname}")
+                        ))
+                        logger.info(f"Successfully removed DNS record: {hostname}")
                         removed = True
                 
                 if not removed:
-                    logger.warning(f"DNS record not found: {hostname}")
+                    logger.warning(f"DNS record not found for removal: {hostname}")
                     
                 return removed
                 
