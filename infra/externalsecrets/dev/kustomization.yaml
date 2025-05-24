@@ -4,7 +4,9 @@ kind: Kustomization
 
 namespace: external-secrets-system
 
-# Deploy External Secrets Operator via Helm
+resources:
+- manifests/namespace.yaml
+
 helmCharts:
 - name: external-secrets
   version: 0.9.11
@@ -14,7 +16,6 @@ helmCharts:
   namespace: external-secrets-system
   includeCRDs: true
 
-# Add common labels
 commonLabels:
   app.kubernetes.io/name: external-secrets
   app.kubernetes.io/component: secrets-management
