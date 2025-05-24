@@ -13,7 +13,7 @@ helmCharts:
   version: 0.9.11
   repo: https://charts.external-secrets.io
   valuesFile: helm-chart/values.yaml
-  namespace: external-secrets
+  namespace: external-secrets-system
   includeCRDs: true
 
 # Add common labels
