@@ -44,6 +44,8 @@ spec:
           value: kube-system
         - name: vip_ddns
           value: "false"
+        - name: svc_enable
+          value: "true"
         - name: vip_leaderelection
           value: "true"
         - name: vip_leaseduration
