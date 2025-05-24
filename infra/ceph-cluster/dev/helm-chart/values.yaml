@@ -310,8 +310,3 @@ ingress:
     - hosts:
       - ceph-dashboard.local
       secretName: ceph-dashboard-tls
-
-# Monitoring (Prometheus integration)
-monitoring:
-  enabled: true
-  createPrometheusRules: true
