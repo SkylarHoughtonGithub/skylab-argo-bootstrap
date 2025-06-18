@@ -12,7 +12,7 @@ cephClusterSpec:
     allowUnsupported: false
   
   # Data directory on host
-  dataDirHostPath: /mnt/storage
+  dataDirHostPath: /mnt/space0
   
   # Skip upgrade checks (homelab)
   skipUpgradeChecks: false
