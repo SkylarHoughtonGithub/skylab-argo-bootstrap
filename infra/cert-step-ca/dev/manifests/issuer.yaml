@@ -6,7 +6,7 @@ metadata:
   name: step-ca-issuer
 spec:
   acme:
-    server: https://step-ca.step-ca.svc.cluster.local:9000/acme/acme/directory
+    server: https://cert-step-ca.step-ca-step-certificates.svc.cluster.local:9000/acme/acme/directory
     email: shoutsky@skylab.local
     privateKeySecretRef:
       name: step-ca-acme-account-key
