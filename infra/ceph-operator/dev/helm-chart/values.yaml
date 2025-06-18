@@ -13,8 +13,8 @@ resources:
     memory: 128Mi
 
 # Node selector for operator (optional)
-# nodeSelector:
-#   node-role.kubernetes.io/control-plane: ""
+nodeSelector:
+  node-type: worker
 
 # Tolerations for control plane nodes
 tolerations:

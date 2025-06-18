@@ -1,6 +1,9 @@
 ---
 operatorNamespace: ceph-operator
 
+nodeSelector:
+  node-type: worker
+
 # Cluster configuration
 cephClusterSpec:
   # Ceph version
@@ -9,7 +12,7 @@ cephClusterSpec:
     allowUnsupported: false
   
   # Data directory on host
-  dataDirHostPath: /var/lib/rook
+  dataDirHostPath: /mnt/storage
   
   # Skip upgrade checks (homelab)
   skipUpgradeChecks: false

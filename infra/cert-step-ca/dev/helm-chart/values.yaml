@@ -4,8 +4,8 @@ step-certificates:
   ca:
     name: "Homelab CA"
     address: ":9000"
-    dns: "step-ca.step-ca.svc.cluster.local,step-ca.homelab.local"
-    url: "https://step-ca.step-ca.svc.cluster.local:9000"
+    dns: "cert-step-ca.step-ca-step-certificates.svc.cluster.local,step-ca-step-certificates.homelab.local"
+    url: "https://cert-step-ca.step-ca-step-certificates.svc.cluster.local:9000"
     
   provisioners:
     - name: acme
@@ -28,14 +28,14 @@ step-certificates:
       traefik.ingress.kubernetes.io/router.tls: "true"
       traefik.ingress.kubernetes.io/router.middlewares: default-secure-headers@kubernetescrd
     hosts:
-      - host: step-ca.homelab.local
+      - host: step-ca-step-certificates.homelab.local
         paths:
           - path: /
             pathType: Prefix
     tls:
       - secretName: step-ca-tls
         hosts:
-          - step-ca.homelab.local
+          - step-ca-step-certificates.homelab.local
 
   bootstrap:
     enabled: true
