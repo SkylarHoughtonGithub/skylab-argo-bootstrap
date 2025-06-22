@@ -46,8 +46,6 @@ extraEnvVars:
     value: ".log,.txt,.json"
   - name: MINIO_COMPRESS_MIME_TYPES
     value: "text/*,application/json,application/xml"
-  - name: MINIO_PROMETHEUS_AUTH_TYPE
-    value: "public"
 
 # Disable features we don't need
 containerSecurityContext:
