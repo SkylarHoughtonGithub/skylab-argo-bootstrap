@@ -1,0 +1,131 @@
+# Authentication configuration
+auth:
+  # Use external secret for root credentials
+  existingSecret: minio-root-credentials
+  # These keys must exist in the secret:
+  # - root-user
+  # - root-password
+
+# Deployment mode
+mode: standalone  # or 'distributed' for HA with 4+ nodes
+
+# Default buckets to create
+defaultBuckets: "loki-chunks,loki-ruler,loki-admin,tempo-traces,backup-storage"
+
+# Persistence configuration
+persistence:
+  enabled: true
+  storageClass: "local-path"
+  accessModes:
+    - ReadWriteOnce
+  size: 500Gi
+
+# Service configuration
+service:
+  type: ClusterIP
+  ports:
+    api: 9000
+    console: 9001
+
+# Resource limits
+resources:
+  requests:
+    cpu: 500m
+    memory: 1Gi
+
+# Node scheduling
+nodeSelector:
+  node-type: worker
+
+
+# Extra environment variables for optimization
+extraEnvVars:
+  - name: MINIO_COMPRESS
+    value: "true"
+  - name: MINIO_COMPRESS_EXTENSIONS
+    value: ".log,.txt,.json"
+  - name: MINIO_COMPRESS_MIME_TYPES
+    value: "text/*,application/json,application/xml"
+  - name: MINIO_PROMETHEUS_AUTH_TYPE
+    value: "public"
+
+# Disable features we don't need
+containerSecurityContext:
+  enabled: false
+podSecurityContext:
+  enabled: false
+metrics:
+  serviceMonitor:
+    enabled: false
+  prometheusRule:
+    enabled: false
+networkPolicy:
+  enabled: false
+podDisruptionBudget:
+  enabled: false
+
+# Ingress (disabled for now)
+ingress:
+  enabled: false
+  # Future configuration:
+  # ingressClassName: nginx
+  # hostname: minio.yourdomain.com
+  # annotations:
+  #   cert-manager.io/cluster-issuer: "letsencrypt-prod"
+  # tls: true
+
+consoleIngress:
+  enabled: false
+  # Future configuration:
+  # ingressClassName: nginx
+  # hostname: minio-console.yourdomain.com
+  # annotations:
+  #   cert-manager.io/cluster-issuer: "letsencrypt-prod"
+  # tls: true
+
+# Probes configuration
+livenessProbe:
+  enabled: true
+  initialDelaySeconds: 5
+  periodSeconds: 5
+  timeoutSeconds: 5
+  failureThreshold: 5
+  successThreshold: 1
+
+readinessProbe:
+  enabled: true
+  initialDelaySeconds: 5
+  periodSeconds: 5
+  timeoutSeconds: 1
+  failureThreshold: 3
+  successThreshold: 1
+
+startupProbe:
+  enabled: true
+  initialDelaySeconds: 0
+  periodSeconds: 10
+  timeoutSeconds: 5
+  failureThreshold: 60
+  successThreshold: 1
+
+provisioning:
+  enabled: false
+
+# Extra configuration files
+extraConfig: ""
+
+# Pod annotations
+podAnnotations: {}
+
+# Pod labels  
+podLabels: {}
+
+# Tolerations
+tolerations: []
+
+# Affinity
+affinity: {}
+
+# Volume permissions (since we're using security context)
+volumePermissions:
+  enabled: false

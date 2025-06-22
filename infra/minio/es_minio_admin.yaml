@@ -1,0 +1,31 @@
+---
+apiVersion: external-secrets.io/v1beta1
+kind: ExternalSecret
+metadata:
+  name: minio-root-credentials
+  namespace: minio
+spec:
+  refreshInterval: 1h
+  secretStoreRef:
+    name: aws-secrets-manager
+    kind: ClusterSecretStore
+  
+  target:
+    name: minio-root-credentials
+    creationPolicy: Owner
+    template:
+      type: Opaque
+      data:
+        root-user: "{{ .rootUser }}"
+        root-password: "{{ .rootPassword }}"
+  
+  data:
+    - secretKey: rootUser
+      remoteRef:
+        key: minio/admin
+        property: username
+    
+    - secretKey: rootPassword
+      remoteRef:
+        key: minio/admin
+        property: password
