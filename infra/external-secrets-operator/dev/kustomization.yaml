@@ -5,14 +5,14 @@ kind: Kustomization
 namespace: external-secrets-system
 
 resources:
-- manifests/namespace.yaml
+- namespace.yaml
 
 helmCharts:
 - name: external-secrets
   version: 0.9.11
   repo: https://charts.external-secrets.io
   releaseName: es
-  valuesFile: helm-chart/values.yaml
+  valuesFile: values.yaml
   namespace: external-secrets-system
   includeCRDs: true
 
