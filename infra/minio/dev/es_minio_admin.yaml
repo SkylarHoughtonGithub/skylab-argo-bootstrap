@@ -22,10 +22,15 @@ spec:
   data:
     - secretKey: rootUser
       remoteRef:
+        conversionStrategy: Default	
+        decodingStrategy: None
         key: minio/admin
         property: username
-    
+        metadataPolicy: None
     - secretKey: rootPassword
       remoteRef:
+        conversionStrategy: Default	
+        decodingStrategy: None
         key: minio/admin
         property: password
+        metadataPolicy: None
