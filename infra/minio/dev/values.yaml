@@ -37,6 +37,21 @@ resources:
 nodeSelector:
   node-type: worker
 
+containerSecurityContext:
+  enabled: true
+  runAsUser: 1001
+  runAsGroup: 1001
+  runAsNonRoot: true
+  allowPrivilegeEscalation: false
+  readOnlyRootFilesystem: false
+  capabilities:
+    drop:
+      - ALL
+
+podSecurityContext:
+  enabled: true
+  fsGroup: 1001
+  fsGroupChangePolicy: "OnRootMismatch"
 
 # Extra environment variables for optimization
 extraEnvVars:
@@ -48,10 +63,6 @@ extraEnvVars:
     value: "text/*,application/json,application/xml"
 
 # Disable features we don't need
-containerSecurityContext:
-  enabled: false
-podSecurityContext:
-  enabled: false
 metrics:
   serviceMonitor:
     enabled: false
@@ -65,21 +76,9 @@ podDisruptionBudget:
 # Ingress (disabled for now)
 ingress:
   enabled: false
-  # Future configuration:
-  # ingressClassName: nginx
-  # hostname: minio.yourdomain.com
-  # annotations:
-  #   cert-manager.io/cluster-issuer: "letsencrypt-prod"
-  # tls: true
 
 consoleIngress:
   enabled: false
-  # Future configuration:
-  # ingressClassName: nginx
-  # hostname: minio-console.yourdomain.com
-  # annotations:
-  #   cert-manager.io/cluster-issuer: "letsencrypt-prod"
-  # tls: true
 
 # Probes configuration
 livenessProbe:
@@ -124,6 +123,5 @@ tolerations: []
 # Affinity
 affinity: {}
 
-# Volume permissions (since we're using security context)
 volumePermissions:
-  enabled: false
+  enabled: true
