@@ -106,7 +106,7 @@ startupProbe:
   successThreshold: 1
 
 provisioning:
-  enabled: false
+  enabled: true
 
 # Extra configuration files
 extraConfig: ""
