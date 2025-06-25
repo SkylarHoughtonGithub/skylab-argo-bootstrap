@@ -11,4 +11,11 @@ helmCharts:
   version: v1.13.3
   releaseName: cert-manager
   namespace: cert-manager
-  valuesFile: values.yaml
+  valuesFile: cert-manager-values.yaml
+
+- name: step-issuer
+  repo: https://smallstep.github.io/helm-charts
+  version: 1.9.8
+  releaseName: step-issuer
+  namespace: step-issuer
+  valuesFile: step-issuer-values.yaml
