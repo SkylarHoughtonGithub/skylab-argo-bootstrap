@@ -1,7 +1,7 @@
 service:
   type: LoadBalancer
   port: 443
-  targetPort: 9001
+  targetPort: 8443
 
 bootstrap:
   enabled: true
@@ -20,7 +20,7 @@ ca:
     storageClass: local-path
     annotations:
       argocd.argoproj.io/compare-options: IgnoreExtraneous
-      
+
 resources:
   requests:
     cpu: 100m
