@@ -25,8 +25,13 @@ service:
   type: LoadBalancer
   ports:
     api: 9000
-    console: 9001
 
+console:
+  service:
+    type: LoadBalancer
+    ports:
+      http: 9090
+      
 # Resource limits
 resources:
   requests:
@@ -71,9 +76,6 @@ metrics:
 networkPolicy:
   enabled: false
 podDisruptionBudget:
-  enabled: false
-
-consoleIngress:
   enabled: false
 
 # Probes configuration
