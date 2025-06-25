@@ -4,7 +4,7 @@ kind: ExternalSecret
 metadata:
   name: minio-users
 spec:
-  refreshInterval: 15s
+  refreshInterval: 1h
   secretStoreRef:
     name: aws-secrets-manager
     kind: ClusterSecretStore
@@ -12,11 +12,17 @@ spec:
     name: minio-user-secrets
     creationPolicy: Owner
   data:
-  - remoteRef:
-    secretKey: accesskey
+  - secretKey: accesskey
+    remoteRef:
       key: minio/users/loki
       property: accesskey
-  - remoteRef:
-    secretKey: secretkey
+      metadataPolicy: None
+      conversionStrategy: Default	
+      decodingStrategy: None
+  - secretKey: secretkey
+    remoteRef:
       key: minio/users/loki
       property: secretkey
+      metadataPolicy: None
+      conversionStrategy: Default	
+      decodingStrategy: None
