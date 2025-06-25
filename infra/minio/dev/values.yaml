@@ -25,11 +25,6 @@ tls:
       duration: 24h0m0s
       renewBefore: 8h0m0s
 
-service:
-  type: LoadBalancer
-  ports:
-    api: 9000
-
 ingress:
   enabled: true
   ingressClassName: traefik
@@ -40,10 +35,6 @@ ingress:
   tls: true
   
 console:
-  service:
-    type: LoadBalancer
-    ports:
-      http: 9090
   ingress:
     enabled: true
     ingressClassName: traefik
