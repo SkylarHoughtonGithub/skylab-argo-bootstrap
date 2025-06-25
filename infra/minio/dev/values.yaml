@@ -108,7 +108,7 @@ startupProbe:
 provisioning:
   enabled: true
   usersExistingSecrets:
-    - minio-user-secrets
+    - minio-users-secret
 
 # Extra configuration files
 extraConfig: ""
