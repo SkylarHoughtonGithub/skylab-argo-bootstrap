@@ -4,5 +4,3 @@ kind: Kustomization
 
 resources:
 - step-cluster-issuer.yaml
-- test-certificate.yaml
-
