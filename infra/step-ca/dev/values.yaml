@@ -14,11 +14,13 @@ ca:
   provisioner:
     name: "admin"
     
-persistence:
-  enabled: true
-  size: 1Gi
-  storageClass: local-path
-
+  persistence:
+    enabled: true
+    size: 1Gi
+    storageClass: local-path
+    annotations:
+      argocd.argoproj.io/compare-options: IgnoreExtraneous
+      
 resources:
   requests:
     cpu: 100m
