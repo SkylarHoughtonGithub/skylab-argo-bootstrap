@@ -22,7 +22,7 @@ persistence:
 
 # Service configuration
 service:
-  type: ClusterIP
+  type: LoadBalancer
   ports:
     api: 9000
     console: 9001
@@ -71,10 +71,6 @@ metrics:
 networkPolicy:
   enabled: false
 podDisruptionBudget:
-  enabled: false
-
-# Ingress (disabled for now)
-ingress:
   enabled: false
 
 consoleIngress:
