@@ -1,0 +1,28 @@
+service:
+  type: LoadBalancer
+  port: 443
+  targetPort: 9001
+
+bootstrap:
+  enabled: true
+  
+ca:
+  name: "skylab CA"
+  address: ":9001"
+  dns: "step-ca.step-ca.svc.cluster.local,step-ca.skylarhoughtongithub.local"
+  
+  provisioner:
+    name: "admin"
+    
+persistence:
+  enabled: true
+  size: 1Gi
+  storageClass: local-path
+
+resources:
+  requests:
+    cpu: 100m
+    memory: 128Mi
+  limits:
+    cpu: 200m
+    memory: 256Mi
