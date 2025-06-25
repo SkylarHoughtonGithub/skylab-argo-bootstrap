@@ -17,5 +17,5 @@ helmCharts:
   repo: https://smallstep.github.io/helm-charts
   version: 1.9.8
   releaseName: step-issuer
-  namespace: step-issuer
+  namespace: cert-manager
   valuesFile: step-issuer-values.yaml
