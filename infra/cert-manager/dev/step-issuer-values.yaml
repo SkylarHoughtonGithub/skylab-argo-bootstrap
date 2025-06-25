@@ -1,0 +1,10 @@
+nameOverride: step-issuer
+
+replicaCount: 1
+
+image:
+  pullPolicy: IfNotPresent
+
+serviceAccount:
+  create: true
+  name: ""
