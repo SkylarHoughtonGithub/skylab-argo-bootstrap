@@ -13,6 +13,6 @@ spec:
     name: admin
     kid: i1egU5eZ40ky7WyhmFPpfIyGrP1-0hXxxokQ0ueGMQ0
     passwordRef:
-      name: step-ca-provisioner-password
+      name: step-ca-step-certificates-provisioner-password
       namespace: step-ca
       key: password
