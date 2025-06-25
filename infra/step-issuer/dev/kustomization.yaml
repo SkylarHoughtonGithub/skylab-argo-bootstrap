@@ -7,9 +7,9 @@ resources:
 - step-cluster-issuer.yaml
 
 helmCharts:
-- name: cert-manager
-  repo: https://charts.jetstack.io
-  version: v1.13.3
-  releaseName: cert-manager
-  namespace: cert-manager
+- name: step-issuer
+  repo: https://smallstep.github.io/helm-charts
+  version: 1.9.8
+  releaseName: step-issuer
+  namespace: step-issuer
   valuesFile: values.yaml
