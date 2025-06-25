@@ -12,5 +12,5 @@ spec:
     group: certmanager.step.sm
   dnsNames:
   - test.skylarhoughtongithub.local
-  duration: 24h
-  renewBefore: 8h
+  duration: 24h0m0s
+  renewBefore: 8h0m0s
