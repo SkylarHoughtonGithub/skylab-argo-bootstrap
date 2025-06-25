@@ -1,18 +1,10 @@
-# Authentication configuration
 auth:
-  # Use external secret for root credentials
   existingSecret: minio-root-credentials
-  # These keys must exist in the secret:
-  # - root-user
-  # - root-password
 
-# Deployment mode
-mode: standalone  # or 'distributed' for HA with 4+ nodes
+mode: standalone
 
-# Default buckets to create
 defaultBuckets: "loki-chunks,loki-ruler,loki-admin,tempo-traces,backup-storage"
 
-# Persistence configuration
 persistence:
   enabled: true
   storageClass: "local-path"
@@ -20,25 +12,39 @@ persistence:
     - ReadWriteOnce
   size: 100Gi
 
-# Service configuration
 service:
   type: LoadBalancer
   ports:
     api: 9000
 
+ingress:
+  enabled: true
+  ingressClassName: traefik
+  hostname: minio-api.skylarhoughtongithub.local
+  annotations:
+    cert-manager.io/cluster-issuer: step-ca-cluster-issuer
+    traefik.ingress.kubernetes.io/router.entrypoints: websecure
+  tls: true
+  
 console:
   service:
     type: LoadBalancer
     ports:
       http: 9090
-      
-# Resource limits
+  ingress:
+    enabled: true
+    ingressClassName: traefik
+    hostname: minio-console.skylarhoughtongithub.local
+    annotations:
+      cert-manager.io/cluster-issuer: step-ca-cluster-issuer
+      traefik.ingress.kubernetes.io/router.entrypoints: websecure
+    tls: true
+
 resources:
   requests:
     cpu: 500m
     memory: 1Gi
 
-# Node scheduling
 nodeSelector:
   node-type: worker
 
@@ -58,7 +64,6 @@ podSecurityContext:
   fsGroup: 1001
   fsGroupChangePolicy: "OnRootMismatch"
 
-# Extra environment variables for optimization
 extraEnvVars:
   - name: MINIO_COMPRESS
     value: "true"
@@ -67,7 +72,6 @@ extraEnvVars:
   - name: MINIO_COMPRESS_MIME_TYPES
     value: "text/*,application/json,application/xml"
 
-# Disable features we don't need
 metrics:
   serviceMonitor:
     enabled: false
@@ -78,7 +82,6 @@ networkPolicy:
 podDisruptionBudget:
   enabled: false
 
-# Probes configuration
 livenessProbe:
   enabled: true
   initialDelaySeconds: 5
@@ -108,19 +111,14 @@ provisioning:
   usersExistingSecrets:
     - minio-users-secret
 
-# Extra configuration files
 extraConfig: ""
 
-# Pod annotations
 podAnnotations: {}
 
-# Pod labels  
 podLabels: {}
 
-# Tolerations
 tolerations: []
 
-# Affinity
 affinity: {}
 
 volumePermissions:
