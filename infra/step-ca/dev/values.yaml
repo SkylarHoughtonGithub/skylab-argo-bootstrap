@@ -1,5 +1,5 @@
 service:
-  type: LoadBalancer
+  type: ClusterIP
   port: 443
   targetPort: 8443
 
@@ -8,7 +8,7 @@ bootstrap:
   
 ca:
   name: "skylab CA"
-  address: ":9001"
+  address: ":8443"
   dns: "step-ca.step-ca.svc.cluster.local,step-ca.skylarhoughtongithub.local"
   
   provisioner:
@@ -18,8 +18,6 @@ ca:
     enabled: true
     size: 1Gi
     storageClass: local-path
-    annotations:
-      argocd.argoproj.io/compare-options: IgnoreExtraneous
 
 resources:
   requests:
