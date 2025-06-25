@@ -1,4 +1,3 @@
----
 apiVersion: external-secrets.io/v1beta1
 kind: ExternalSecret
 metadata:
@@ -7,22 +6,10 @@ spec:
   refreshInterval: 1h
   secretStoreRef:
     name: aws-secrets-manager
-    kind: ClusterSecretStore
+    kind: SecretStore
   target:
-    name: minio-user-secrets
+    name: minio-users-secret
     creationPolicy: Owner
-  data:
-  - secretKey: accesskey
-    remoteRef:
+  dataFrom:
+  - extract:
       key: minio/users/loki
-      property: accesskey
-      metadataPolicy: None
-      conversionStrategy: Default	
-      decodingStrategy: None
-  - secretKey: secretkey
-    remoteRef:
-      key: minio/users/loki
-      property: secretkey
-      metadataPolicy: None
-      conversionStrategy: Default	
-      decodingStrategy: None

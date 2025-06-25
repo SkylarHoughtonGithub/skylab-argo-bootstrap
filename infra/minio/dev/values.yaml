@@ -12,10 +12,6 @@ mode: standalone  # or 'distributed' for HA with 4+ nodes
 # Default buckets to create
 defaultBuckets: "loki-chunks,loki-ruler,loki-admin,tempo-traces,backup-storage"
 
-usersExistingSecrets:
-  - name: minio-user-secrets
-    policy: "readwrite"
-
 # Persistence configuration
 persistence:
   enabled: true
@@ -111,6 +107,8 @@ startupProbe:
 
 provisioning:
   enabled: true
+  usersExistingSecrets:
+    - minio-user-secrets
 
 # Extra configuration files
 extraConfig: ""
