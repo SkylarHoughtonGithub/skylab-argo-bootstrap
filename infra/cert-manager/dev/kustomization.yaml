@@ -4,6 +4,7 @@ kind: Kustomization
 
 resources:
 - namespace.yaml
+- github.com/smallstep/step-issuer/config/crd?ref=master
 
 helmCharts:
 - name: cert-manager
