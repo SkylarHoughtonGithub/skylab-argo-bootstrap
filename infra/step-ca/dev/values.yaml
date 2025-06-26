@@ -9,7 +9,7 @@ bootstrap:
 ca:
   name: "skylab CA"
   address: ":8443"
-  dns: "step-ca.step-ca.svc.cluster.local,step-ca.skylarhoughtongithub.local"
+  dns: "step-ca.step-ca.svc.cluster.local,step-ca.skylarhoughtongithub.local,step-ca-step-certificates.step-ca.svc.skylarhoughtongithub.local"
   
   provisioner:
     name: "admin"
