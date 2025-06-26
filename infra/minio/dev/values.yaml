@@ -17,8 +17,10 @@ ingress:
   ingressClassName: traefik
   hostname: minio.skylarhoughtongithub.local
   annotations:
-    cert-manager.io/cluster-issuer: step-ca-cluster-issuer
-    traefik.ingress.kubernetes.io/router.entrypoints: websecure
+      cert-manager.io/issuer: step-ca-cluster-issuer
+      cert-manager.io/issuer-kind: StepClusterIssuer  
+      cert-manager.io/issuer-group: certmanager.step.sm
+      traefik.ingress.kubernetes.io/router.entrypoints: websecure
   tls: true
   
 console:
@@ -27,7 +29,9 @@ console:
     ingressClassName: traefik
     hostname: minio-console.skylarhoughtongithub.local
     annotations:
-      cert-manager.io/cluster-issuer: step-ca-cluster-issuer
+      cert-manager.io/issuer: step-ca-cluster-issuer
+      cert-manager.io/issuer-kind: StepClusterIssuer  
+      cert-manager.io/issuer-group: certmanager.step.sm
       traefik.ingress.kubernetes.io/router.entrypoints: websecure
     tls: true
 
