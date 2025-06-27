@@ -1,0 +1,18 @@
+global:
+  domain: argocd.skylarhoughtongithub.local
+
+server:
+  service:
+    type: LoadBalancer
+  certificate:
+    enabled: true
+    domain: skylarhoughtongithub.local
+    issuer:
+      group: certmanager.step.sm
+      kind: StepClusterIssuer
+      name: step-ca-cluster-issuer
+  ingress:
+    enabled: true
+    ingressClassName: traefik
+    hostname: argocd.skylarhoughtongithub.local
+    tls: true
