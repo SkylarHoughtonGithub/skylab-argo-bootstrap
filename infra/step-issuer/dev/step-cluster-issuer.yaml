@@ -11,7 +11,7 @@ spec:
   
   provisioner:
     name: admin
-    kid: jwbGkpeMmASYs-SPFeB4EkCkg1X9DBT9JXbrjQXj-Io
+    kid: f8umA4KN9UOybkZ5CIanKkka-445O7NkOvGKTvZTyPw
     passwordRef:
       name: step-ca-step-certificates-provisioner-password
       namespace: cert-manager
