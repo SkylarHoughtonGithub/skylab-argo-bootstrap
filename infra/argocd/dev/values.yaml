@@ -1,11 +1,11 @@
 global:
-  domain: argocd.skylarhoughtongithub.local
+  domain: skylarhoughtongithub.local
 
 server:
   service:
     type: LoadBalancer
   certificate:
-    enabled: true
+    enabled: false
     domain: skylarhoughtongithub.local
     issuer:
       group: certmanager.step.sm
@@ -15,4 +15,4 @@ server:
     enabled: true
     ingressClassName: traefik
     hostname: argocd.skylarhoughtongithub.local
-    tls: true
+    tls: false
