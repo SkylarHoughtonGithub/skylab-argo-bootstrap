@@ -12,7 +12,7 @@ helmCharts:
   version: v1.13.3
   releaseName: cert-manager
   namespace: cert-manager
-  valuesFile: values.yaml
+  valuesFile: cert-manager-values.yaml
 
 helmCharts:
 - name: step-issuer
@@ -20,4 +20,4 @@ helmCharts:
   version: 1.9.8
   releaseName: step-issuer
   namespace: cert-manager
-  valuesFile: values.yaml
+  valuesFile: step-issuer-values.yaml
