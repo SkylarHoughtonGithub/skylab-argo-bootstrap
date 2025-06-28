@@ -2,8 +2,6 @@
 apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
 
-namespace: external-secrets-system
-
 resources:
 - namespace.yaml
 
@@ -13,7 +11,7 @@ helmCharts:
   repo: https://charts.external-secrets.io
   releaseName: es
   valuesFile: values.yaml
-  namespace: external-secrets-system
+  namespace: external-secrets
   includeCRDs: true
 
 commonLabels:
