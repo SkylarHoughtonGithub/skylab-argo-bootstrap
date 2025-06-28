@@ -14,7 +14,6 @@ helmCharts:
   namespace: cert-manager
   valuesFile: cert-manager-values.yaml
 
-helmCharts:
 - name: step-issuer
   repo: https://smallstep.github.io/helm-charts
   version: 1.9.8
