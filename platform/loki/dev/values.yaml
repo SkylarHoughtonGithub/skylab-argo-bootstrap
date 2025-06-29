@@ -1,5 +1,11 @@
 loki:
   auth_enabled: false
+  
+  ui:
+    enabled: true
+
+  querier:
+    max_concurrent: 4
 
   schemaConfig:
     configs:
