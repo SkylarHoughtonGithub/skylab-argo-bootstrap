@@ -5,7 +5,6 @@ kind: Kustomization
 namespace: minio
 
 resources:
-  - namespace.yaml
   - es_minio_admin.yaml
   - es_minio_users.yaml
 
