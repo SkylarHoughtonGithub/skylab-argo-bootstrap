@@ -7,8 +7,8 @@ resources:
 
 helmCharts:
 - name: headlamp
-  repo: https://headlamp-k8s.github.io/headlamp/
-  version: "0.31.1"
+  repo: https://kubernetes-sigs.github.io/headlamp/
+  version: 0.31.1
   valuesFile: values.yaml
   namespace: headlamp
 
