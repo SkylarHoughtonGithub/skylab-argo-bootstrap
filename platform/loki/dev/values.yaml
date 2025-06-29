@@ -1,0 +1,48 @@
+loki:
+  auth_enabled: false
+  storage:
+    s3:
+      access_key_id: ${ACCESS_KEY_ID}
+      secret_access_key: ${SECRET_ACCESS_KEY}
+      endpoint: https://minio.skylarhoughtongithub.local
+      s3ForcePathStyle: true
+      bucketNames:
+        chunks: loki-chunks
+        ruler: loki-ruler
+        admin: loki-admin
+
+extraEnvFrom:
+  - secretRef:
+      name: minio-users-secret
+
+global:
+  dnsService: kube-dns
+
+gateway:
+  enabled: true
+  ingress:
+    enabled: true
+    ingressClassName: traefik
+    hosts:
+      - host: loki.skylarhoughtongithub.local
+        paths:
+          - path: /
+            pathType: Prefix
+    annotations:
+      cert-manager.io/issuer: step-ca-cluster-issuer
+      cert-manager.io/issuer-kind: StepClusterIssuer  
+      cert-manager.io/issuer-group: certmanager.step.sm
+      traefik.ingress.kubernetes.io/router.entrypoints: websecure
+    tls:
+      - secretName: loki-tls
+        hosts:
+
+read:
+  replicas: 1
+
+write:
+  replicas: 1
+
+backend:
+  replicas: 1
+          - loki.skylarhoughtongithub.local
