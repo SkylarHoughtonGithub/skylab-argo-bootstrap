@@ -1,15 +1,26 @@
 loki:
   auth_enabled: false
+
+  schemaConfig:
+    configs:
+    - from: "2024-04-01"
+      store: tsdb
+      object_store: s3
+      schema: v13
+      index:
+        prefix: loki_index_
+        period: 24h
+
   storage:
+    bucketNames:
+      chunks: loki-chunks
+      ruler: loki-ruler
+      admin: loki-admin
     s3:
       access_key_id: ${ACCESS_KEY_ID}
       secret_access_key: ${SECRET_ACCESS_KEY}
       endpoint: https://minio.skylarhoughtongithub.local
       s3ForcePathStyle: true
-      bucketNames:
-        chunks: loki-chunks
-        ruler: loki-ruler
-        admin: loki-admin
 
 extraEnvFrom:
   - secretRef:
@@ -36,6 +47,7 @@ gateway:
     tls:
       - secretName: loki-tls
         hosts:
+          - loki.skylarhoughtongithub.local
 
 read:
   replicas: 1
@@ -45,4 +57,3 @@ write:
 
 backend:
   replicas: 1
-          - loki.skylarhoughtongithub.local
