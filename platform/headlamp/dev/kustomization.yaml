@@ -1,0 +1,14 @@
+---
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+resources:
+- namespace.yaml
+
+helmCharts:
+- name: headlamp
+  repo: https://headlamp-k8s.github.io/headlamp/
+  version: "0.25.2"  # Check for latest version
+  valuesFile: headlamp-values.yaml
+  namespace: headlamp
+

@@ -1,0 +1,19 @@
+ingress:
+  enabled: true
+  ingressClassName: traefik
+  annotations:
+    cert-manager.io/issuer: step-ca-cluster-issuer
+    cert-manager.io/issuer-kind: StepClusterIssuer  
+    cert-manager.io/issuer-group: certmanager.step.sm
+    traefik.ingress.kubernetes.io/router.entrypoints: websecure
+  hosts:
+    - host: headlamp.skylarhoughtongithub.local
+      paths:
+        - path: /
+          pathType: Prefix
+  tls:
+    - secretName: headlamp-tls
+      hosts:
+        - headlamp.skylarhoughtongithub.local
+
+
