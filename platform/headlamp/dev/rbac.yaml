@@ -2,20 +2,20 @@
 apiVersion: v1
 kind: ServiceAccount
 metadata:
-  name: headlamp-admin
+  name: headlamp-admin-web
   namespace: headlamp
 ---
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRoleBinding
 metadata:
-  name: headlamp-admin
+  name: headlamp-admin-web
 roleRef:
   apiGroup: rbac.authorization.k8s.io
   kind: ClusterRole
   name: cluster-admin
 subjects:
 - kind: ServiceAccount
-  name: headlamp-admin
+  name: headlamp-admin-web
   namespace: headlamp
 ---
 apiVersion: v1
@@ -24,5 +24,5 @@ metadata:
   name: headlamp-admin-token
   namespace: headlamp
   annotations:
-    kubernetes.io/service-account.name: headlamp-admin
+    kubernetes.io/service-account.name: headlamp-admin-web
 type: kubernetes.io/service-account-token
