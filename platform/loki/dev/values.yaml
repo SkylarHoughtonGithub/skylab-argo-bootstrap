@@ -3,6 +3,8 @@ loki:
   
   ui:
     enabled: true
+    gateway:
+      enabled: true
 
   querier:
     max_concurrent: 4
