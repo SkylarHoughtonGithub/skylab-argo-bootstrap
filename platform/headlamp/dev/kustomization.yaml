@@ -10,5 +10,6 @@ helmCharts:
   repo: https://kubernetes-sigs.github.io/headlamp/
   version: 0.31.1
   valuesFile: values.yaml
+  releaseName: headlamp
   namespace: headlamp
 
