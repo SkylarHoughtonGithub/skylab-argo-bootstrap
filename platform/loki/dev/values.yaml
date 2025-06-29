@@ -32,7 +32,7 @@ loki:
 
 extraEnvFrom:
   - secretRef:
-      name: minio-users-secret
+      name: loki-bucket-creds
 
 global:
   dnsService: kube-dns

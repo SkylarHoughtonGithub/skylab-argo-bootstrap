@@ -4,6 +4,7 @@ kind: Kustomization
 
 resources:
   - namespace.yaml
+  - es_minio_users.yaml
 
 helmCharts:
   - name: loki
