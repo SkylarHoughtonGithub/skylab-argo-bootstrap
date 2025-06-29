@@ -8,7 +8,7 @@ resources:
 helmCharts:
 - name: headlamp
   repo: https://headlamp-k8s.github.io/headlamp/
-  version: "0.25.2"  # Check for latest version
-  valuesFile: headlamp-values.yaml
+  version: "0.31.1"
+  valuesFile: values.yaml
   namespace: headlamp
 
