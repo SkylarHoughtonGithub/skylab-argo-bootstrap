@@ -1,0 +1,31 @@
+admin:
+  existingSecret: grafana-admin-secret
+  userKey: username
+  passwordKey: password
+
+ingress:
+  enabled: true
+  ingressClassName: traefik
+  annotations:
+    cert-manager.io/issuer: step-ca-cluster-issuer
+    cert-manager.io/issuer-kind: StepClusterIssuer  
+    cert-manager.io/issuer-group: certmanager.step.sm
+    traefik.ingress.kubernetes.io/router.entrypoints: websecure
+  hosts:
+    - grafana.skylarhoughtongithub.local
+  tls: true
+
+datasources:
+  datasources.yaml:
+    apiVersion: 1
+    datasources:
+    - name: Loki
+      type: loki
+      access: proxy
+      url: https://loki.skylarhoughtongithub.local
+      isDefault: true
+      editable: true
+
+persistence:
+  enabled: true
+  size: 5Gi
