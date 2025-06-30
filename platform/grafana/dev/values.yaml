@@ -13,7 +13,10 @@ ingress:
     traefik.ingress.kubernetes.io/router.entrypoints: websecure
   hosts:
     - grafana.skylarhoughtongithub.local
-  tls: true
+  tls:
+  - secretName: grafana-tls
+    hosts:
+    - grafana.skylarhoughtongithub.local 
 
 datasources:
   datasources.yaml:
