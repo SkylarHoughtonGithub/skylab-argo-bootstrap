@@ -25,7 +25,7 @@ datasources:
     - name: Loki
       type: loki
       access: proxy
-      url: https://loki.skylarhoughtongithub.local
+      url: http://loki-gateway.loki.svc.cluster.local
       isDefault: true
       editable: true
 
