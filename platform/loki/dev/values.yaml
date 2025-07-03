@@ -68,12 +68,6 @@ global:
 
 gateway:
   enabled: true
-  # Add nginx config for timeouts
-  nginxConfig:
-    httpSnippet: |
-      proxy_read_timeout 300s;
-      proxy_connect_timeout 300s;
-      proxy_send_timeout 300s;
   ingress:
     enabled: true
     ingressClassName: traefik
