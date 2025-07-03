@@ -52,7 +52,7 @@ loki:
       secret_access_key: ${SECRET_ACCESS_KEY}
       endpoint: https://minio.skylarhoughtongithub.local
       s3ForcePathStyle: true
-      insecure: false
+      insecure: true
 
   # Compactor configuration
   compactor:
