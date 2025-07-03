@@ -6,6 +6,28 @@ loki:
 
   querier:
     max_concurrent: 4
+    query_timeout: 5m
+  
+  query_frontend:
+    max_outstanding_per_tenant: 100
+
+  limits_config:
+    query_timeout: 5m
+    max_query_parallelism: 16
+    max_concurrent_queries: 20
+    max_cache_freshness_per_query: 10m
+    retention_period: 744h
+
+  storage_config:
+    chunk_store_config:
+      chunk_cache_config:
+        embedded_cache:
+          enabled: true
+          max_size_mb: 100
+    index_queries_cache_config:
+      embedded_cache:
+        enabled: true
+        max_size_mb: 100
 
   schemaConfig:
     configs:
@@ -27,6 +49,11 @@ loki:
       secret_access_key: ${SECRET_ACCESS_KEY}
       endpoint: https://minio.skylarhoughtongithub.local
       s3ForcePathStyle: true
+      insecure: false
+  compactor:
+    working_directory: /tmp/loki/compactor
+    shared_store: s3
+    compaction_interval: 10m
 
 extraEnvFrom:
   - secretRef:
