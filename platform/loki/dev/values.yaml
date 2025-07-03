@@ -48,7 +48,7 @@ loki:
       ruler: loki-ruler
       admin: loki-admin
     s3:
-      endpoint: https://minio.skylarhoughtongithub.local
+      endpoint: http://minio.skylarhoughtongithub.local
       s3ForcePathStyle: true
       insecure: true
       region: us-east-1
