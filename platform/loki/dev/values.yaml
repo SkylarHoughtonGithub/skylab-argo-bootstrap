@@ -54,17 +54,6 @@ loki:
       region: us-east-1
 
 
-extraEnv:
-- name: AWS_ACCESS_KEY_ID
-  valueFrom:
-    secretKeyRef:
-      name: loki-bucket-creds
-      key: ACCESS_KEY_ID
-- name: AWS_SECRET_ACCESS_KEY
-  valueFrom:
-    secretKeyRef:
-      name: loki-bucket-creds
-      key: SECRET_ACCESS_KEY
 
   # Compactor configuration
   compactor:
@@ -77,6 +66,17 @@ extraEnvFrom:
 
 global:
   dnsService: kube-dns
+  extraEnv:
+  - name: AWS_ACCESS_KEY_ID
+    valueFrom:
+      secretKeyRef:
+        name: loki-bucket-creds
+        key: ACCESS_KEY_ID
+  - name: AWS_SECRET_ACCESS_KEY
+    valueFrom:
+      secretKeyRef:
+        name: loki-bucket-creds
+        key: SECRET_ACCESS_KEY
 
 gateway:
   enabled: true
