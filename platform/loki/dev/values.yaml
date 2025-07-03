@@ -96,6 +96,9 @@ read:
     limits:
       cpu: 1000m
       memory: 1Gi
+  extraEnvFrom:
+  - secretRef:
+      name: loki-bucket-creds
 
 write:
   replicas: 1
@@ -106,6 +109,9 @@ write:
     limits:
       cpu: 500m
       memory: 1Gi
+  extraEnvFrom:
+  - secretRef:
+      name: loki-bucket-creds
 
 backend:
   replicas: 1
@@ -116,6 +122,9 @@ backend:
     limits:
       cpu: 500m
       memory: 1Gi
+  extraEnvFrom:
+  - secretRef:
+      name: loki-bucket-creds
 
 # Configure caching for better performance
 chunksCache:

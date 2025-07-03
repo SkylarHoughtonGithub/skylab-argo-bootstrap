@@ -1,0 +1,31 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: loki-debug
+  namespace: loki
+  labels:
+    app: loki-debug
+spec:
+  containers:
+  - name: debug
+    image: almalinux:latest
+    command:
+    - /bin/bash
+    - -c
+    - |
+      sleep 3600
+    envFrom:
+    - secretRef:
+        name: loki-bucket-creds
+    env:
+    - name: MINIO_ENDPOINT
+      value: "https://minio.skylarhoughtongithub.local"
+    resources:
+      requests:
+        cpu: 100m
+        memory: 128Mi
+      limits:
+        cpu: 200m
+        memory: 256Mi
+  restartPolicy: Never
+  terminationGracePeriodSeconds: 5
