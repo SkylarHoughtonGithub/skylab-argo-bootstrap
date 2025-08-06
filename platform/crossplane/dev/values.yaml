@@ -4,7 +4,6 @@ metrics:
 
 args:
   - --debug
-  - --enable-environment-configs
   - --enable-usages
 
 packageCache:
