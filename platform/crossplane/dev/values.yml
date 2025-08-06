@@ -1,0 +1,22 @@
+---
+# crossplane-operator/values.yaml
+image:
+  tag: "v1.15.0"
+
+# Enable metrics for monitoring
+metrics:
+  enabled: true
+
+# Crossplane arguments
+args:
+  - --debug
+  - --enable-environment-configs
+  - --enable-usages
+
+# Package cache configuration
+packageCache:
+  sizeLimit: 5Mi
+
+# Enable webhook configurations
+webhooks:
+  enabled: true
