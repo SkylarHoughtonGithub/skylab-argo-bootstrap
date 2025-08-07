@@ -5,6 +5,7 @@ kind: Kustomization
 
 resources:
 - namespace.yaml
+- github.com/crossplane-contrib/provider-aws/master/package/crds?ref=master
 
 helmCharts:
 - name: crossplane
