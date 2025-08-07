@@ -4,4 +4,4 @@ kind: Kustomization
 namespace: crossplane-system
 
 resources:
-- github.com//awslabs/crossplane-on-eks/compositions?ref=master
+- github.com/awslabs/crossplane-on-eks/compositions?ref=master
