@@ -5,3 +5,4 @@ namespace: crossplane-system
 
 resources:
 - github.com/awslabs/crossplane-on-eks/compositions?ref=main
+- github.com/awslabs/crossplane-on-eks/compositions/upbound-aws-provider?ref=main
