@@ -3,7 +3,7 @@ apiVersion: batch/v1
 kind: CronJob
 metadata:
   name: ecr-token-refresh
-  namespace: default
+  namespace: external-secrets
 spec:
   schedule: "0 */6 * * *"  # Every 6 hours
   successfulJobsHistoryLimit: 1
@@ -25,59 +25,21 @@ spec:
               value: "635314249418.dkr.ecr.us-east-2.amazonaws.com"
             - name: AWS_DEFAULT_REGION
               value: "us-east-2"
-            - name: NAMESPACES
-              value: "default"
             command:
             - /bin/bash
             - -c
             - |
-              set -e
-              echo "Starting ECR token refresh at $(date)"
+              curl -LO "https://dl.k8s.io/release/v1.28.0/bin/linux/amd64/kubectl"
+              chmod +x kubectl && mv kubectl /usr/local/bin/
               
-              # Install kubectl if not present
-              if ! command -v kubectl &> /dev/null; then
-                echo "Installing kubectl..."
-                curl -LO "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl"
-                chmod +x kubectl
-                mv kubectl /usr/local/bin/
-              fi
-              
-              # Get ECR login token
-              echo "Fetching ECR login token..."
               TOKEN=$(aws ecr get-login-password --region $AWS_DEFAULT_REGION)
               
-              if [ -z "$TOKEN" ]; then
-                echo "Failed to get ECR token"
-                exit 1
-              fi
-              
-              # Update secret in specified namespaces
-              for ns in $NAMESPACES; do
-                echo "Processing namespace: $ns"
-                
-                # Check if namespace exists
-                if ! kubectl get namespace $ns &> /dev/null; then
-                  echo "Namespace $ns does not exist, skipping..."
-                  continue
-                fi
-                
-                # Create or update the docker registry secret
+              for ns in $(kubectl get namespaces -o name | cut -d/ -f2 | grep -v '^kube-'); do
                 kubectl create secret docker-registry ecr-registry-secret \
                   --docker-server=$ECR_REGISTRY \
                   --docker-username=AWS \
-                  --docker-password=$TOKEN \
+                  --docker-password="$TOKEN" \
                   --namespace=$ns \
                   --dry-run=client -o yaml | kubectl apply -f -
-                
-                echo "✓ Updated ECR secret in namespace: $ns"
+                echo "Updated: $ns"
               done
-              
-              echo "ECR token refresh completed successfully at $(date)"
-            volumeMounts:
-            - name: aws-credentials
-              mountPath: /root/.aws
-              readOnly: true
-          volumes:
-          - name: aws-credentials
-            secret:
-              secretName: aws-credentials
