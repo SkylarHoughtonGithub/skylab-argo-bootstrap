@@ -28,7 +28,6 @@ spec:
                 secretKeyRef:
                   name: aws-credentials
                   key: secret-access-key
-            env:
             - name: ECR_REGISTRY
               value: "635314249418.dkr.ecr.us-east-2.amazonaws.com"
             - name: AWS_DEFAULT_REGION
