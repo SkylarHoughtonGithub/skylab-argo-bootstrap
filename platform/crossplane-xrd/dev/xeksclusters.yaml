@@ -1,0 +1,74 @@
+apiVersion: apiextensions.crossplane.io/v1
+kind: CompositeResourceDefinition
+metadata:
+  name: xeksclusters.infrastructure.skylab.com
+spec:
+  group: infrastructure.skylab.com
+  names:
+    kind: XEKSCluster
+    plural: xeksclusters
+  versions:
+  - name: v1alpha1
+    served: true
+    referenceable: true
+    schema:
+      openAPIV3Schema:
+        type: object
+        properties:
+          spec:
+            type: object
+            properties:
+              clusterName:
+                type: string
+                description: "Name of the EKS cluster"
+              region:
+                type: string
+                description: "AWS region"
+                default: "us-east-2"
+              environment:
+                type: string
+                description: "Environment (dev, staging, prod)"
+                default: dev
+              clusterType:
+                type: string
+                description: "Cluster type (standard, gpu-enabled, etc.)"
+                default: standard
+              kubernetesVersion:
+                type: string
+                description: "Kubernetes version"
+                default: "1.28"
+              nodeCount:
+                type: integer
+                description: "Desired number of nodes"
+                default: 1
+                minimum: 1
+                maximum: 10
+              nodeSize:
+                type: string
+                description: "EC2 instance type for nodes"
+                default: "t3.medium"
+              vpcCidr:
+                type: string
+                description: "VPC CIDR block"
+                default: "192.168.0.0/16"
+              subnetCidrs:
+                type: array
+                description: "Subnet CIDR blocks"
+                items:
+                  type: string
+                default: ["192.168.10.0/24", "192.168.11.0/24"]
+              allowedCidrs:
+                type: array
+                description: "CIDR blocks allowed access"
+                items:
+                  type: string
+                default: ["68.52.182.6/32"]
+          status:
+            type: object
+            properties:
+              clusterEndpoint:
+                type: string
+                description: "EKS cluster endpoint"
+              clusterStatus:
+                type: string
+                description: "EKS cluster status"
