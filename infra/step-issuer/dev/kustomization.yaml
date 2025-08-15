@@ -1,6 +1,55 @@
 ---
 apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
-
+namespace: cert-manager
 resources:
 - step-cluster-issuer.yaml
+
+replacements:
+- source:
+    kind: ConfigMap
+    name: step-ca-extracted-config
+    fieldPath: data.ca-bundle
+  targets:
+  - select:
+      kind: StepClusterIssuer
+    fieldPaths:
+    - spec.caBundle
+    options:
+      delimiter: ""
+- source:
+    kind: ConfigMap  
+    name: step-ca-extracted-config
+    fieldPath: data.provisioner-name
+  targets:
+  - select:
+      kind: StepClusterIssuer
+    fieldPaths:
+    - spec.provisioner.name
+    options:
+      delimiter: ""
+- source:
+    kind: ConfigMap
+    name: step-ca-extracted-config
+    fieldPath: data.provisioner-kid
+  targets:
+  - select:
+      kind: StepClusterIssuer
+    fieldPaths:
+    - spec.provisioner.kid
+    options:
+      delimiter: ""
+- source:
+    kind: ConfigMap
+    name: step-ca-extracted-config
+    fieldPath: data.url
+  targets:
+  - select:
+      kind: StepClusterIssuer
+    fieldPaths:
+    - spec.url
+    options:
+      delimiter: ""
+commonLabels:
+  app.kubernetes.io/component: step-issuer
+  environment: dev
