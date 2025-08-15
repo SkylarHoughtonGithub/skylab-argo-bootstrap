@@ -13,19 +13,20 @@ spec:
         - /bin/sh
         - -c
         - |
+          ISSUER_NAME="step-ca-cluster-issuer"
           # Extract all values
           CA_JSON=$(kubectl get configmap -n cert-manager step-ca-step-certificates-config -o jsonpath='{.data.ca\.json}')
           PROVISIONER_NAME=$(echo "$CA_JSON" | jq -r '.authority.provisioners[0].name')
           PROVISIONER_KID=$(echo "$CA_JSON" | jq -r '.authority.provisioners[0].key.kid')
           URL=$(echo "$CA_JSON" | jq -r '("https://" + .dnsNames[0] + .address)')
           CA_BUNDLE=$(kubectl get configmap -n cert-manager step-ca-step-certificates-certs -o jsonpath='{.data.root_ca\.crt}' | base64 -w 0)
-          
+          kubectl delete stepclusterissuer $ISSUER_NAME
           # Deploy the StepClusterIssuer
           cat <<EOF | kubectl apply -f -
           apiVersion: certmanager.step.sm/v1beta1
           kind: StepClusterIssuer
           metadata:
-            name: step-ca-cluster-issuer
+            name: ${ISSUER_NAME}
             annotations:
               argocd.argoproj.io/sync-options: Prune=false
           spec:
