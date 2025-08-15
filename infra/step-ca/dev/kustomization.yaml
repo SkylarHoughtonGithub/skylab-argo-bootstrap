@@ -1,15 +1,14 @@
----
 apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
-
 helmCharts:
 - name: step-certificates
-  repo: https://smallstep.github.io/helm-charts
-  version: 1.26.2
-  releaseName: step-ca
   namespace: cert-manager
+  releaseName: step-ca
+  repo: https://smallstep.github.io/helm-charts
   valuesFile: values.yaml
-
-commonLabels:
-  app.kubernetes.io/component: step-ca
-  environment: dev
+  version: 1.26.2
+labels:
+- includeSelectors: true
+  pairs:
+    app.kubernetes.io/component: step-ca
+    environment: dev
