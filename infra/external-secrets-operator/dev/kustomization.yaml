@@ -15,6 +15,5 @@ helmCharts:
   includeCRDs: true
 
 commonLabels:
-  app.kubernetes.io/name: external-secrets
-  app.kubernetes.io/component: secrets-management
+  app.kubernetes.io/component: external-secrets
   environment: dev

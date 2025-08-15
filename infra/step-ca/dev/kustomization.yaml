@@ -9,3 +9,7 @@ helmCharts:
   releaseName: step-ca
   namespace: cert-manager
   valuesFile: values.yaml
+
+commonLabels:
+  app.kubernetes.io/component: step-ca
+  environment: dev

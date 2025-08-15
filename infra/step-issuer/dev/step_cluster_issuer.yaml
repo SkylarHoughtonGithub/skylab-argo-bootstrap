@@ -1,0 +1,15 @@
+---
+apiVersion: certmanager.step.sm/v1beta1
+kind: StepClusterIssuer
+metadata:
+  name: step-ca-cluster-issuer
+spec:
+  url: PLACEHOLDER_URL
+  caBundle: PLACEHOLDER_CA_BUNDLE
+  provisioner:
+    name: PLACEHOLDER_PROVISIONER_NAME
+    kid: PLACEHOLDER_PROVISIONER_KID
+    passwordRef:
+      name: step-ca-step-certificates-provisioner-password
+      namespace: cert-manager
+      key: password

@@ -20,3 +20,7 @@ helmCharts:
   releaseName: step-issuer
   namespace: cert-manager
   valuesFile: step-issuer-values.yaml
+
+commonLabels:
+  app.kubernetes.io/component: cert-manager
+  environment: dev
