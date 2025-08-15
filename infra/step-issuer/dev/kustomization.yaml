@@ -4,48 +4,7 @@ namespace: cert-manager
 resources:
 - job_step_ca_config.yaml
 - sa_step_config_extractor.yaml
-- step_cluster_issuer.yaml
-replacements:
-- source:
-    fieldPath: data.ca-bundle
-    kind: ConfigMap
-    name: step-ca-extracted-config
-  targets:
-  - fieldPaths:
-    - spec.caBundle
-    options: {}
-    select:
-      kind: StepClusterIssuer
-- source:
-    fieldPath: data.provisioner-name
-    kind: ConfigMap
-    name: step-ca-extracted-config
-  targets:
-  - fieldPaths:
-    - spec.provisioner.name
-    options: {}
-    select:
-      kind: StepClusterIssuer
-- source:
-    fieldPath: data.provisioner-kid
-    kind: ConfigMap
-    name: step-ca-extracted-config
-  targets:
-  - fieldPaths:
-    - spec.provisioner.kid
-    options: {}
-    select:
-      kind: StepClusterIssuer
-- source:
-    fieldPath: data.url
-    kind: ConfigMap
-    name: step-ca-extracted-config
-  targets:
-  - fieldPaths:
-    - spec.url
-    options: {}
-    select:
-      kind: StepClusterIssuer
+
 labels:
 - includeSelectors: true
   pairs:
