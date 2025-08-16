@@ -1,21 +1,19 @@
----
 apiVersion: apiextensions.crossplane.io/v1
 kind: Composition
 metadata:
-  name: eks-cluster-composition
   labels:
     provider: aws
     service: eks
+  name: eks-cluster-composition
 spec:
-  writeConnectionSecretsToNamespace: crossplane-system
   compositeTypeRef:
     apiVersion: infrastructure.skylab.com/v1alpha1
     kind: XEKSCluster
-  
+  mode: Resources
+  publishConnectionDetailsWithStoreConfigRef:
+    name: default
   resources:
-    # VPC
-    - name: vpc
-      base:
+    - base:
         apiVersion: ec2.aws.crossplane.io/v1beta1
         kind: VPC
         spec:
@@ -28,51 +26,58 @@ spec:
                 value: crossplane
           providerConfigRef:
             name: default
+      name: vpc
       patches:
-        - type: FromCompositeFieldPath
-          fromFieldPath: spec.region
+        - fromFieldPath: spec.region
           toFieldPath: spec.forProvider.region
-        - type: FromCompositeFieldPath
-          fromFieldPath: spec.vpcCidr
+          type: FromCompositeFieldPath
+        - fromFieldPath: spec.vpcCidr
           toFieldPath: spec.forProvider.cidrBlock
-        - type: FromCompositeFieldPath
-          fromFieldPath: spec.clusterName
+          type: FromCompositeFieldPath
+        - fromFieldPath: spec.clusterName
           toFieldPath: metadata.name
           transforms:
-            - type: string
-              string:
-                fmt: "%s-vpc"
-        - type: FromCompositeFieldPath
-          fromFieldPath: spec.clusterName
+            - string:
+                fmt: '%s-vpc'
+                type: Format
+              type: string
+          type: FromCompositeFieldPath
+        - fromFieldPath: spec.clusterName
           toFieldPath: spec.forProvider.tags[0].value
           transforms:
-            - type: string
-              string:
-                fmt: "%s-vpc"
-        - type: FromCompositeFieldPath
-          fromFieldPath: spec.environment
+            - string:
+                fmt: '%s-vpc'
+                type: Format
+              type: string
+          type: FromCompositeFieldPath
+        - fromFieldPath: spec.environment
           toFieldPath: spec.forProvider.tags[1].key
           transforms:
-            - type: string
-              string:
-                fmt: "Environment"
-        - type: FromCompositeFieldPath
-          fromFieldPath: spec.environment
+            - string:
+                fmt: Environment
+                type: Format
+              type: string
+          type: FromCompositeFieldPath
+        - fromFieldPath: spec.environment
           toFieldPath: spec.forProvider.tags[1].value
-        - type: FromCompositeFieldPath
-          fromFieldPath: spec.clusterType
+          type: FromCompositeFieldPath
+        - fromFieldPath: spec.clusterType
           toFieldPath: spec.forProvider.tags[2].key
           transforms:
-            - type: string
-              string:
-                fmt: "ClusterType"
-        - type: FromCompositeFieldPath
-          fromFieldPath: spec.clusterType
+            - string:
+                fmt: ClusterType
+                type: Format
+              type: string
+          type: FromCompositeFieldPath
+        - fromFieldPath: spec.clusterType
           toFieldPath: spec.forProvider.tags[2].value
-
-    # Internet Gateway
-    - name: igw
-      base:
+          type: FromCompositeFieldPath
+      readinessChecks:
+        - matchCondition:
+            status: 'True'
+            type: Ready
+          type: MatchCondition
+    - base:
         apiVersion: ec2.aws.crossplane.io/v1beta1
         kind: InternetGateway
         spec:
@@ -82,45 +87,52 @@ spec:
                 value: crossplane
           providerConfigRef:
             name: default
+      name: igw
       patches:
-        - type: FromCompositeFieldPath
-          fromFieldPath: spec.region
+        - fromFieldPath: spec.region
           toFieldPath: spec.forProvider.region
-        - type: FromCompositeFieldPath
-          fromFieldPath: spec.clusterName
+          type: FromCompositeFieldPath
+        - fromFieldPath: spec.clusterName
           toFieldPath: metadata.name
           transforms:
-            - type: string
-              string:
-                fmt: "%s-igw"
-        - type: FromCompositeFieldPath
-          fromFieldPath: spec.clusterName
+            - string:
+                fmt: '%s-igw'
+                type: Format
+              type: string
+          type: FromCompositeFieldPath
+        - fromFieldPath: spec.clusterName
           toFieldPath: spec.forProvider.vpcIdRef.name
           transforms:
-            - type: string
-              string:
-                fmt: "%s-vpc"
-        - type: FromCompositeFieldPath
-          fromFieldPath: spec.clusterName
+            - string:
+                fmt: '%s-vpc'
+                type: Format
+              type: string
+          type: FromCompositeFieldPath
+        - fromFieldPath: spec.clusterName
           toFieldPath: spec.forProvider.tags[0].value
           transforms:
-            - type: string
-              string:
-                fmt: "%s-igw"
-        - type: FromCompositeFieldPath
-          fromFieldPath: spec.environment
+            - string:
+                fmt: '%s-igw'
+                type: Format
+              type: string
+          type: FromCompositeFieldPath
+        - fromFieldPath: spec.environment
           toFieldPath: spec.forProvider.tags[1].key
           transforms:
-            - type: string
-              string:
-                fmt: "Environment"
-        - type: FromCompositeFieldPath
-          fromFieldPath: spec.environment
+            - string:
+                fmt: Environment
+                type: Format
+              type: string
+          type: FromCompositeFieldPath
+        - fromFieldPath: spec.environment
           toFieldPath: spec.forProvider.tags[1].value
-
-    # Subnet 1
-    - name: subnet-1
-      base:
+          type: FromCompositeFieldPath
+      readinessChecks:
+        - matchCondition:
+            status: 'True'
+            type: Ready
+          type: MatchCondition
+    - base:
         apiVersion: ec2.aws.crossplane.io/v1beta1
         kind: Subnet
         spec:
@@ -131,55 +143,63 @@ spec:
                 value: crossplane
           providerConfigRef:
             name: default
+      name: subnet-1
       patches:
-        - type: FromCompositeFieldPath
-          fromFieldPath: spec.region
+        - fromFieldPath: spec.region
           toFieldPath: spec.forProvider.region
-        - type: FromCompositeFieldPath
-          fromFieldPath: spec.region
+          type: FromCompositeFieldPath
+        - fromFieldPath: spec.region
           toFieldPath: spec.forProvider.availabilityZone
           transforms:
-            - type: string
-              string:
-                fmt: "%sa"
-        - type: FromCompositeFieldPath
-          fromFieldPath: spec.subnetCidrs[0]
+            - string:
+                fmt: '%sa'
+                type: Format
+              type: string
+          type: FromCompositeFieldPath
+        - fromFieldPath: spec.subnetCidrs[0]
           toFieldPath: spec.forProvider.cidrBlock
-        - type: FromCompositeFieldPath
-          fromFieldPath: spec.clusterName
+          type: FromCompositeFieldPath
+        - fromFieldPath: spec.clusterName
           toFieldPath: metadata.name
           transforms:
-            - type: string
-              string:
-                fmt: "%s-subnet-1"
-        - type: FromCompositeFieldPath
-          fromFieldPath: spec.clusterName
+            - string:
+                fmt: '%s-subnet-1'
+                type: Format
+              type: string
+          type: FromCompositeFieldPath
+        - fromFieldPath: spec.clusterName
           toFieldPath: spec.forProvider.vpcIdRef.name
           transforms:
-            - type: string
-              string:
-                fmt: "%s-vpc"
-        - type: FromCompositeFieldPath
-          fromFieldPath: spec.clusterName
+            - string:
+                fmt: '%s-vpc'
+                type: Format
+              type: string
+          type: FromCompositeFieldPath
+        - fromFieldPath: spec.clusterName
           toFieldPath: spec.forProvider.tags[0].value
           transforms:
-            - type: string
-              string:
-                fmt: "%s-subnet-1"
-        - type: FromCompositeFieldPath
-          fromFieldPath: spec.environment
+            - string:
+                fmt: '%s-subnet-1'
+                type: Format
+              type: string
+          type: FromCompositeFieldPath
+        - fromFieldPath: spec.environment
           toFieldPath: spec.forProvider.tags[1].key
           transforms:
-            - type: string
-              string:
-                fmt: "Environment"
-        - type: FromCompositeFieldPath
-          fromFieldPath: spec.environment
+            - string:
+                fmt: Environment
+                type: Format
+              type: string
+          type: FromCompositeFieldPath
+        - fromFieldPath: spec.environment
           toFieldPath: spec.forProvider.tags[1].value
-
-    # Subnet 2
-    - name: subnet-2
-      base:
+          type: FromCompositeFieldPath
+      readinessChecks:
+        - matchCondition:
+            status: 'True'
+            type: Ready
+          type: MatchCondition
+    - base:
         apiVersion: ec2.aws.crossplane.io/v1beta1
         kind: Subnet
         spec:
@@ -190,55 +210,63 @@ spec:
                 value: crossplane
           providerConfigRef:
             name: default
+      name: subnet-2
       patches:
-        - type: FromCompositeFieldPath
-          fromFieldPath: spec.region
+        - fromFieldPath: spec.region
           toFieldPath: spec.forProvider.region
-        - type: FromCompositeFieldPath
-          fromFieldPath: spec.region
+          type: FromCompositeFieldPath
+        - fromFieldPath: spec.region
           toFieldPath: spec.forProvider.availabilityZone
           transforms:
-            - type: string
-              string:
-                fmt: "%sc"
-        - type: FromCompositeFieldPath
-          fromFieldPath: spec.subnetCidrs[1]
+            - string:
+                fmt: '%sc'
+                type: Format
+              type: string
+          type: FromCompositeFieldPath
+        - fromFieldPath: spec.subnetCidrs[1]
           toFieldPath: spec.forProvider.cidrBlock
-        - type: FromCompositeFieldPath
-          fromFieldPath: spec.clusterName
+          type: FromCompositeFieldPath
+        - fromFieldPath: spec.clusterName
           toFieldPath: metadata.name
           transforms:
-            - type: string
-              string:
-                fmt: "%s-subnet-2"
-        - type: FromCompositeFieldPath
-          fromFieldPath: spec.clusterName
+            - string:
+                fmt: '%s-subnet-2'
+                type: Format
+              type: string
+          type: FromCompositeFieldPath
+        - fromFieldPath: spec.clusterName
           toFieldPath: spec.forProvider.vpcIdRef.name
           transforms:
-            - type: string
-              string:
-                fmt: "%s-vpc"
-        - type: FromCompositeFieldPath
-          fromFieldPath: spec.clusterName
+            - string:
+                fmt: '%s-vpc'
+                type: Format
+              type: string
+          type: FromCompositeFieldPath
+        - fromFieldPath: spec.clusterName
           toFieldPath: spec.forProvider.tags[0].value
           transforms:
-            - type: string
-              string:
-                fmt: "%s-subnet-2"
-        - type: FromCompositeFieldPath
-          fromFieldPath: spec.environment
+            - string:
+                fmt: '%s-subnet-2'
+                type: Format
+              type: string
+          type: FromCompositeFieldPath
+        - fromFieldPath: spec.environment
           toFieldPath: spec.forProvider.tags[1].key
           transforms:
-            - type: string
-              string:
-                fmt: "Environment"
-        - type: FromCompositeFieldPath
-          fromFieldPath: spec.environment
+            - string:
+                fmt: Environment
+                type: Format
+              type: string
+          type: FromCompositeFieldPath
+        - fromFieldPath: spec.environment
           toFieldPath: spec.forProvider.tags[1].value
-
-    # Route Table
-    - name: route-table
-      base:
+          type: FromCompositeFieldPath
+      readinessChecks:
+        - matchCondition:
+            status: 'True'
+            type: Ready
+          type: MatchCondition
+    - base:
         apiVersion: ec2.aws.crossplane.io/v1beta1
         kind: RouteTable
         spec:
@@ -250,74 +278,84 @@ spec:
                 value: crossplane
           providerConfigRef:
             name: default
+      name: route-table
       patches:
-        - type: FromCompositeFieldPath
-          fromFieldPath: spec.region
+        - fromFieldPath: spec.region
           toFieldPath: spec.forProvider.region
-        - type: FromCompositeFieldPath
-          fromFieldPath: spec.clusterName
+          type: FromCompositeFieldPath
+        - fromFieldPath: spec.clusterName
           toFieldPath: metadata.name
           transforms:
-            - type: string
-              string:
-                fmt: "%s-public-rt"
-        - type: FromCompositeFieldPath
-          fromFieldPath: spec.clusterName
+            - string:
+                fmt: '%s-public-rt'
+                type: Format
+              type: string
+          type: FromCompositeFieldPath
+        - fromFieldPath: spec.clusterName
           toFieldPath: spec.forProvider.vpcIdRef.name
           transforms:
-            - type: string
-              string:
-                fmt: "%s-vpc"
-        - type: FromCompositeFieldPath
-          fromFieldPath: spec.clusterName
+            - string:
+                fmt: '%s-vpc'
+                type: Format
+              type: string
+          type: FromCompositeFieldPath
+        - fromFieldPath: spec.clusterName
           toFieldPath: spec.forProvider.routes[0].gatewayIdRef.name
           transforms:
-            - type: string
-              string:
-                fmt: "%s-igw"
-        - type: FromCompositeFieldPath
-          fromFieldPath: spec.clusterName
+            - string:
+                fmt: '%s-igw'
+                type: Format
+              type: string
+          type: FromCompositeFieldPath
+        - fromFieldPath: spec.clusterName
           toFieldPath: spec.forProvider.associations[0].subnetIdRef.name
           transforms:
-            - type: string
-              string:
-                fmt: "%s-subnet-1"
-        - type: FromCompositeFieldPath
-          fromFieldPath: spec.clusterName
+            - string:
+                fmt: '%s-subnet-1'
+                type: Format
+              type: string
+          type: FromCompositeFieldPath
+        - fromFieldPath: spec.clusterName
           toFieldPath: spec.forProvider.associations[1].subnetIdRef.name
           transforms:
-            - type: string
-              string:
-                fmt: "%s-subnet-2"
-        - type: FromCompositeFieldPath
-          fromFieldPath: spec.clusterName
+            - string:
+                fmt: '%s-subnet-2'
+                type: Format
+              type: string
+          type: FromCompositeFieldPath
+        - fromFieldPath: spec.clusterName
           toFieldPath: spec.forProvider.tags[0].value
           transforms:
-            - type: string
-              string:
-                fmt: "%s-public-rt"
-        - type: FromCompositeFieldPath
-          fromFieldPath: spec.environment
+            - string:
+                fmt: '%s-public-rt'
+                type: Format
+              type: string
+          type: FromCompositeFieldPath
+        - fromFieldPath: spec.environment
           toFieldPath: spec.forProvider.tags[1].key
           transforms:
-            - type: string
-              string:
-                fmt: "Environment"
-        - type: FromCompositeFieldPath
-          fromFieldPath: spec.environment
+            - string:
+                fmt: Environment
+                type: Format
+              type: string
+          type: FromCompositeFieldPath
+        - fromFieldPath: spec.environment
           toFieldPath: spec.forProvider.tags[1].value
-
-    # Security Group
-    - name: security-group
-      base:
+          type: FromCompositeFieldPath
+      readinessChecks:
+        - matchCondition:
+            status: 'True'
+            type: Ready
+          type: MatchCondition
+    - base:
         apiVersion: ec2.aws.crossplane.io/v1beta1
         kind: SecurityGroup
         spec:
           forProvider:
-            description: "EKS cluster security group"
+            description: EKS cluster security group
             egress:
               - fromPort: -1
-                ipProtocol: "-1"
+                ipProtocol: '-1'
                 ipRanges:
                   - cidrIp: 0.0.0.0/0
                 toPort: -1
@@ -326,59 +364,67 @@ spec:
                 value: crossplane
           providerConfigRef:
             name: default
+      name: security-group
       patches:
-        - type: FromCompositeFieldPath
-          fromFieldPath: spec.region
+        - fromFieldPath: spec.region
           toFieldPath: spec.forProvider.region
-        - type: FromCompositeFieldPath
-          fromFieldPath: spec.clusterName
+          type: FromCompositeFieldPath
+        - fromFieldPath: spec.clusterName
           toFieldPath: metadata.name
           transforms:
-            - type: string
-              string:
-                fmt: "%s-sg"
-        - type: FromCompositeFieldPath
-          fromFieldPath: spec.clusterName
+            - string:
+                fmt: '%s-sg'
+                type: Format
+              type: string
+          type: FromCompositeFieldPath
+        - fromFieldPath: spec.clusterName
           toFieldPath: spec.forProvider.groupName
           transforms:
-            - type: string
-              string:
-                fmt: "%s-sg"
-        - type: FromCompositeFieldPath
-          fromFieldPath: spec.clusterName
+            - string:
+                fmt: '%s-sg'
+                type: Format
+              type: string
+          type: FromCompositeFieldPath
+        - fromFieldPath: spec.clusterName
           toFieldPath: spec.forProvider.vpcIdRef.name
           transforms:
-            - type: string
-              string:
-                fmt: "%s-vpc"
-        - type: FromCompositeFieldPath
-          fromFieldPath: spec.allowedCidrs
+            - string:
+                fmt: '%s-vpc'
+                type: Format
+              type: string
+          type: FromCompositeFieldPath
+        - fromFieldPath: spec.allowedCidrs
           toFieldPath: spec.forProvider.ingress[0].ipRanges
           transforms:
-            - type: map
-              map:
-                cidrIp: "input"
-        - type: FromCompositeFieldPath
-          fromFieldPath: spec.clusterName
+            - map:
+                cidrIp: input
+              type: map
+          type: FromCompositeFieldPath
+        - fromFieldPath: spec.clusterName
           toFieldPath: spec.forProvider.tags[0].value
           transforms:
-            - type: string
-              string:
-                fmt: "%s-sg"
-        - type: FromCompositeFieldPath
-          fromFieldPath: spec.environment
+            - string:
+                fmt: '%s-sg'
+                type: Format
+              type: string
+          type: FromCompositeFieldPath
+        - fromFieldPath: spec.environment
           toFieldPath: spec.forProvider.tags[1].key
           transforms:
-            - type: string
-              string:
-                fmt: "Environment"
-        - type: FromCompositeFieldPath
-          fromFieldPath: spec.environment
+            - string:
+                fmt: Environment
+                type: Format
+              type: string
+          type: FromCompositeFieldPath
+        - fromFieldPath: spec.environment
           toFieldPath: spec.forProvider.tags[1].value
-
-    # EKS Cluster IAM Role
-    - name: cluster-role
-      base:
+          type: FromCompositeFieldPath
+      readinessChecks:
+        - matchCondition:
+            status: 'True'
+            type: Ready
+          type: MatchCondition
+    - base:
         apiVersion: iam.aws.crossplane.io/v1beta1
         kind: Role
         spec:
@@ -401,35 +447,41 @@ spec:
                 value: crossplane
           providerConfigRef:
             name: default
+      name: cluster-role
       patches:
-        - type: FromCompositeFieldPath
-          fromFieldPath: spec.clusterName
+        - fromFieldPath: spec.clusterName
           toFieldPath: metadata.name
           transforms:
-            - type: string
-              string:
-                fmt: "%s-cluster-role"
-        - type: FromCompositeFieldPath
-          fromFieldPath: spec.clusterName
+            - string:
+                fmt: '%s-cluster-role'
+                type: Format
+              type: string
+          type: FromCompositeFieldPath
+        - fromFieldPath: spec.clusterName
           toFieldPath: spec.forProvider.tags[0].value
           transforms:
-            - type: string
-              string:
-                fmt: "%s-cluster-role"
-        - type: FromCompositeFieldPath
-          fromFieldPath: spec.environment
+            - string:
+                fmt: '%s-cluster-role'
+                type: Format
+              type: string
+          type: FromCompositeFieldPath
+        - fromFieldPath: spec.environment
           toFieldPath: spec.forProvider.tags[1].key
           transforms:
-            - type: string
-              string:
-                fmt: "Environment"
-        - type: FromCompositeFieldPath
-          fromFieldPath: spec.environment
+            - string:
+                fmt: Environment
+                type: Format
+              type: string
+          type: FromCompositeFieldPath
+        - fromFieldPath: spec.environment
           toFieldPath: spec.forProvider.tags[1].value
-
-    # EKS Cluster IAM Role Policy Attachment
-    - name: cluster-policy
-      base:
+          type: FromCompositeFieldPath
+      readinessChecks:
+        - matchCondition:
+            status: 'True'
+            type: Ready
+          type: MatchCondition
+    - base:
         apiVersion: iam.aws.crossplane.io/v1beta1
         kind: RolePolicyAttachment
         spec:
@@ -437,25 +489,30 @@ spec:
             policyArn: arn:aws:iam::aws:policy/AmazonEKSClusterPolicy
           providerConfigRef:
             name: default
+      name: cluster-policy
       patches:
-        - type: FromCompositeFieldPath
-          fromFieldPath: spec.clusterName
+        - fromFieldPath: spec.clusterName
           toFieldPath: metadata.name
           transforms:
-            - type: string
-              string:
-                fmt: "%s-cluster-policy"
-        - type: FromCompositeFieldPath
-          fromFieldPath: spec.clusterName
+            - string:
+                fmt: '%s-cluster-policy'
+                type: Format
+              type: string
+          type: FromCompositeFieldPath
+        - fromFieldPath: spec.clusterName
           toFieldPath: spec.forProvider.roleNameRef.name
           transforms:
-            - type: string
-              string:
-                fmt: "%s-cluster-role"
-
-    # Node Group IAM Role
-    - name: node-role
-      base:
+            - string:
+                fmt: '%s-cluster-role'
+                type: Format
+              type: string
+          type: FromCompositeFieldPath
+      readinessChecks:
+        - matchCondition:
+            status: 'True'
+            type: Ready
+          type: MatchCondition
+    - base:
         apiVersion: iam.aws.crossplane.io/v1beta1
         kind: Role
         spec:
@@ -478,35 +535,41 @@ spec:
                 value: crossplane
           providerConfigRef:
             name: default
+      name: node-role
       patches:
-        - type: FromCompositeFieldPath
-          fromFieldPath: spec.clusterName
+        - fromFieldPath: spec.clusterName
           toFieldPath: metadata.name
           transforms:
-            - type: string
-              string:
-                fmt: "%s-node-role"
-        - type: FromCompositeFieldPath
-          fromFieldPath: spec.clusterName
+            - string:
+                fmt: '%s-node-role'
+                type: Format
+              type: string
+          type: FromCompositeFieldPath
+        - fromFieldPath: spec.clusterName
           toFieldPath: spec.forProvider.tags[0].value
           transforms:
-            - type: string
-              string:
-                fmt: "%s-node-role"
-        - type: FromCompositeFieldPath
-          fromFieldPath: spec.environment
+            - string:
+                fmt: '%s-node-role'
+                type: Format
+              type: string
+          type: FromCompositeFieldPath
+        - fromFieldPath: spec.environment
           toFieldPath: spec.forProvider.tags[1].key
           transforms:
-            - type: string
-              string:
-                fmt: "Environment"
-        - type: FromCompositeFieldPath
-          fromFieldPath: spec.environment
+            - string:
+                fmt: Environment
+                type: Format
+              type: string
+          type: FromCompositeFieldPath
+        - fromFieldPath: spec.environment
           toFieldPath: spec.forProvider.tags[1].value
-
-    # Node Group IAM Role Policy Attachments
-    - name: worker-node-policy
-      base:
+          type: FromCompositeFieldPath
+      readinessChecks:
+        - matchCondition:
+            status: 'True'
+            type: Ready
+          type: MatchCondition
+    - base:
         apiVersion: iam.aws.crossplane.io/v1beta1
         kind: RolePolicyAttachment
         spec:
@@ -514,24 +577,30 @@ spec:
             policyArn: arn:aws:iam::aws:policy/AmazonEKSWorkerNodePolicy
           providerConfigRef:
             name: default
+      name: worker-node-policy
       patches:
-        - type: FromCompositeFieldPath
-          fromFieldPath: spec.clusterName
+        - fromFieldPath: spec.clusterName
           toFieldPath: metadata.name
           transforms:
-            - type: string
-              string:
-                fmt: "%s-worker-node-policy"
-        - type: FromCompositeFieldPath
-          fromFieldPath: spec.clusterName
+            - string:
+                fmt: '%s-worker-node-policy'
+                type: Format
+              type: string
+          type: FromCompositeFieldPath
+        - fromFieldPath: spec.clusterName
           toFieldPath: spec.forProvider.roleNameRef.name
           transforms:
-            - type: string
-              string:
-                fmt: "%s-node-role"
-
-    - name: cni-policy
-      base:
+            - string:
+                fmt: '%s-node-role'
+                type: Format
+              type: string
+          type: FromCompositeFieldPath
+      readinessChecks:
+        - matchCondition:
+            status: 'True'
+            type: Ready
+          type: MatchCondition
+    - base:
         apiVersion: iam.aws.crossplane.io/v1beta1
         kind: RolePolicyAttachment
         spec:
@@ -539,24 +608,30 @@ spec:
             policyArn: arn:aws:iam::aws:policy/AmazonEKS_CNI_Policy
           providerConfigRef:
             name: default
+      name: cni-policy
       patches:
-        - type: FromCompositeFieldPath
-          fromFieldPath: spec.clusterName
+        - fromFieldPath: spec.clusterName
           toFieldPath: metadata.name
           transforms:
-            - type: string
-              string:
-                fmt: "%s-cni-policy"
-        - type: FromCompositeFieldPath
-          fromFieldPath: spec.clusterName
+            - string:
+                fmt: '%s-cni-policy'
+                type: Format
+              type: string
+          type: FromCompositeFieldPath
+        - fromFieldPath: spec.clusterName
           toFieldPath: spec.forProvider.roleNameRef.name
           transforms:
-            - type: string
-              string:
-                fmt: "%s-node-role"
-
-    - name: ecr-policy
-      base:
+            - string:
+                fmt: '%s-node-role'
+                type: Format
+              type: string
+          type: FromCompositeFieldPath
+      readinessChecks:
+        - matchCondition:
+            status: 'True'
+            type: Ready
+          type: MatchCondition
+    - base:
         apiVersion: iam.aws.crossplane.io/v1beta1
         kind: RolePolicyAttachment
         spec:
@@ -564,25 +639,30 @@ spec:
             policyArn: arn:aws:iam::aws:policy/AmazonEC2ContainerRegistryReadOnly
           providerConfigRef:
             name: default
+      name: ecr-policy
       patches:
-        - type: FromCompositeFieldPath
-          fromFieldPath: spec.clusterName
+        - fromFieldPath: spec.clusterName
           toFieldPath: metadata.name
           transforms:
-            - type: string
-              string:
-                fmt: "%s-ecr-policy"
-        - type: FromCompositeFieldPath
-          fromFieldPath: spec.clusterName
+            - string:
+                fmt: '%s-ecr-policy'
+                type: Format
+              type: string
+          type: FromCompositeFieldPath
+        - fromFieldPath: spec.clusterName
           toFieldPath: spec.forProvider.roleNameRef.name
           transforms:
-            - type: string
-              string:
-                fmt: "%s-node-role"
-
-    # EKS Cluster
-    - name: eks-cluster
-      base:
+            - string:
+                fmt: '%s-node-role'
+                type: Format
+              type: string
+          type: FromCompositeFieldPath
+      readinessChecks:
+        - matchCondition:
+            status: 'True'
+            type: Ready
+          type: MatchCondition
+    - base:
         apiVersion: eks.aws.crossplane.io/v1beta1
         kind: Cluster
         spec:
@@ -597,78 +677,88 @@ spec:
             name: default
           writeConnectionSecretToRef:
             namespace: crossplane-system
+      name: eks-cluster
       patches:
-        - type: FromCompositeFieldPath
-          fromFieldPath: spec.region
+        - fromFieldPath: spec.region
           toFieldPath: spec.forProvider.region
-        - type: FromCompositeFieldPath
-          fromFieldPath: spec.kubernetesVersion
+          type: FromCompositeFieldPath
+        - fromFieldPath: spec.kubernetesVersion
           toFieldPath: spec.forProvider.version
-        - type: FromCompositeFieldPath
-          fromFieldPath: spec.clusterName
+          type: FromCompositeFieldPath
+        - fromFieldPath: spec.clusterName
           toFieldPath: metadata.name
-        - type: FromCompositeFieldPath
-          fromFieldPath: spec.clusterName
+          type: FromCompositeFieldPath
+        - fromFieldPath: spec.clusterName
           toFieldPath: spec.forProvider.roleArnRef.name
           transforms:
-            - type: string
-              string:
-                fmt: "%s-cluster-role"
-        - type: FromCompositeFieldPath
-          fromFieldPath: spec.clusterName
+            - string:
+                fmt: '%s-cluster-role'
+                type: Format
+              type: string
+          type: FromCompositeFieldPath
+        - fromFieldPath: spec.clusterName
           toFieldPath: spec.forProvider.resourcesVpcConfig.securityGroupIdRefs[0].name
           transforms:
-            - type: string
-              string:
-                fmt: "%s-sg"
-        - type: FromCompositeFieldPath
-          fromFieldPath: spec.clusterName
+            - string:
+                fmt: '%s-sg'
+                type: Format
+              type: string
+          type: FromCompositeFieldPath
+        - fromFieldPath: spec.clusterName
           toFieldPath: spec.forProvider.resourcesVpcConfig.subnetIdRefs[0].name
           transforms:
-            - type: string
-              string:
-                fmt: "%s-subnet-1"
-        - type: FromCompositeFieldPath
-          fromFieldPath: spec.clusterName
+            - string:
+                fmt: '%s-subnet-1'
+                type: Format
+              type: string
+          type: FromCompositeFieldPath
+        - fromFieldPath: spec.clusterName
           toFieldPath: spec.forProvider.resourcesVpcConfig.subnetIdRefs[1].name
           transforms:
-            - type: string
-              string:
-                fmt: "%s-subnet-2"
-        - type: FromCompositeFieldPath
-          fromFieldPath: spec.clusterName
+            - string:
+                fmt: '%s-subnet-2'
+                type: Format
+              type: string
+          type: FromCompositeFieldPath
+        - fromFieldPath: spec.clusterName
           toFieldPath: spec.forProvider.tags[0].value
-        - type: FromCompositeFieldPath
-          fromFieldPath: spec.environment
+          type: FromCompositeFieldPath
+        - fromFieldPath: spec.environment
           toFieldPath: spec.forProvider.tags[1].key
           transforms:
-            - type: string
-              string:
-                fmt: "Environment"
-        - type: FromCompositeFieldPath
-          fromFieldPath: spec.environment
+            - string:
+                fmt: Environment
+                type: Format
+              type: string
+          type: FromCompositeFieldPath
+        - fromFieldPath: spec.environment
           toFieldPath: spec.forProvider.tags[1].value
-        - type: FromCompositeFieldPath
-          fromFieldPath: spec.clusterType
+          type: FromCompositeFieldPath
+        - fromFieldPath: spec.clusterType
           toFieldPath: spec.forProvider.tags[2].key
           transforms:
-            - type: string
-              string:
-                fmt: "ClusterType"
-        - type: FromCompositeFieldPath
-          fromFieldPath: spec.clusterType
+            - string:
+                fmt: ClusterType
+                type: Format
+              type: string
+          type: FromCompositeFieldPath
+        - fromFieldPath: spec.clusterType
           toFieldPath: spec.forProvider.tags[2].value
-        - type: FromCompositeFieldPath
-          fromFieldPath: spec.clusterName
+          type: FromCompositeFieldPath
+        - fromFieldPath: spec.clusterName
           toFieldPath: spec.writeConnectionSecretToRef.name
           transforms:
-            - type: string
-              string:
-                fmt: "%s-conn"
-
-    # EKS Node Group
-    - name: nodegroup
-      base:
+            - string:
+                fmt: '%s-conn'
+                type: Format
+              type: string
+          type: FromCompositeFieldPath
+      readinessChecks:
+        - matchCondition:
+            status: 'True'
+            type: Ready
+          type: MatchCondition
+    - base:
         apiVersion: eks.aws.crossplane.io/v1alpha1
         kind: NodeGroup
         spec:
@@ -680,74 +770,88 @@ spec:
                 value: crossplane
           providerConfigRef:
             name: default
+      name: nodegroup
       patches:
-        - type: FromCompositeFieldPath
-          fromFieldPath: spec.region
+        - fromFieldPath: spec.region
           toFieldPath: spec.forProvider.region
-        - type: FromCompositeFieldPath
-          fromFieldPath: spec.clusterName
+          type: FromCompositeFieldPath
+        - fromFieldPath: spec.clusterName
           toFieldPath: metadata.name
           transforms:
-            - type: string
-              string:
-                fmt: "%s-nodegroup"
-        - type: FromCompositeFieldPath
-          fromFieldPath: spec.clusterName
+            - string:
+                fmt: '%s-nodegroup'
+                type: Format
+              type: string
+          type: FromCompositeFieldPath
+        - fromFieldPath: spec.clusterName
           toFieldPath: spec.forProvider.clusterNameRef.name
-        - type: FromCompositeFieldPath
-          fromFieldPath: spec.clusterName
+          type: FromCompositeFieldPath
+        - fromFieldPath: spec.clusterName
           toFieldPath: spec.forProvider.nodeRoleRef.name
           transforms:
-            - type: string
-              string:
-                fmt: "%s-node-role"
-        - type: FromCompositeFieldPath
-          fromFieldPath: spec.clusterName
+            - string:
+                fmt: '%s-node-role'
+                type: Format
+              type: string
+          type: FromCompositeFieldPath
+        - fromFieldPath: spec.clusterName
           toFieldPath: spec.forProvider.subnetRefs[0].name
           transforms:
-            - type: string
-              string:
-                fmt: "%s-subnet-1"
-        - type: FromCompositeFieldPath
-          fromFieldPath: spec.clusterName
+            - string:
+                fmt: '%s-subnet-1'
+                type: Format
+              type: string
+          type: FromCompositeFieldPath
+        - fromFieldPath: spec.clusterName
           toFieldPath: spec.forProvider.subnetRefs[1].name
           transforms:
-            - type: string
-              string:
-                fmt: "%s-subnet-2"
-        - type: FromCompositeFieldPath
-          fromFieldPath: spec.nodeCount
+            - string:
+                fmt: '%s-subnet-2'
+                type: Format
+              type: string
+          type: FromCompositeFieldPath
+        - fromFieldPath: spec.nodeCount
           toFieldPath: spec.forProvider.scalingConfig.desiredSize
-        - type: FromCompositeFieldPath
-          fromFieldPath: spec.nodeCount
+          type: FromCompositeFieldPath
+        - fromFieldPath: spec.nodeCount
           toFieldPath: spec.forProvider.scalingConfig.maxSize
-        - type: FromCompositeFieldPath
-          fromFieldPath: spec.nodeSize
+          type: FromCompositeFieldPath
+        - fromFieldPath: spec.nodeSize
           toFieldPath: spec.forProvider.instanceTypes[0]
-        - type: FromCompositeFieldPath
-          fromFieldPath: spec.clusterName
+          type: FromCompositeFieldPath
+        - fromFieldPath: spec.clusterName
           toFieldPath: spec.forProvider.tags[0].value
           transforms:
-            - type: string
-              string:
-                fmt: "%s-nodegroup"
-        - type: FromCompositeFieldPath
-          fromFieldPath: spec.environment
+            - string:
+                fmt: '%s-nodegroup'
+                type: Format
+              type: string
+          type: FromCompositeFieldPath
+        - fromFieldPath: spec.environment
           toFieldPath: spec.forProvider.tags[1].key
           transforms:
-            - type: string
-              string:
-                fmt: "Environment"
-        - type: FromCompositeFieldPath
-          fromFieldPath: spec.environment
+            - string:
+                fmt: Environment
+                type: Format
+              type: string
+          type: FromCompositeFieldPath
+        - fromFieldPath: spec.environment
           toFieldPath: spec.forProvider.tags[1].value
-        - type: FromCompositeFieldPath
-          fromFieldPath: spec.clusterType
+          type: FromCompositeFieldPath
+        - fromFieldPath: spec.clusterType
           toFieldPath: spec.forProvider.tags[2].key
           transforms:
-            - type: string
-              string:
-                fmt: "ClusterType"
-        - type: FromCompositeFieldPath
-          fromFieldPath: spec.clusterType
+            - string:
+                fmt: ClusterType
+                type: Format
+              type: string
+          type: FromCompositeFieldPath
+        - fromFieldPath: spec.clusterType
           toFieldPath: spec.forProvider.tags[2].value
+          type: FromCompositeFieldPath
+      readinessChecks:
+        - matchCondition:
+            status: 'True'
+            type: Ready
+          type: MatchCondition
+  writeConnectionSecretsToNamespace: crossplane-system
