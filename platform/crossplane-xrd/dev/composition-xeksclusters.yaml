@@ -332,7 +332,8 @@ spec:
               - fromPort: 443
                 toPort: 443
                 ipProtocol: tcp
-                ipRanges: []
+                ipRanges:
+                  - cidrIp: 0.0.0.0/0
             tags:
               - key: ManagedBy
                 value: crossplane
@@ -369,12 +370,8 @@ spec:
                 type: Format
               type: string
           type: FromCompositeFieldPath
-        - fromFieldPath: spec.allowedCidrs
-          toFieldPath: spec.forProvider.ingress[0].ipRanges
-          transforms:
-            - type: map
-              map:
-                cidrIp: .
+        - fromFieldPath: spec.allowedCidrs[0]
+          toFieldPath: spec.forProvider.ingress[0].ipRanges[0].cidrIp
           type: FromCompositeFieldPath
         - fromFieldPath: spec.clusterName
           toFieldPath: spec.forProvider.tags[0].value
