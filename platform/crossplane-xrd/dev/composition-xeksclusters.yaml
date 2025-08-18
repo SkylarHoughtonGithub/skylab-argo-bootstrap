@@ -811,6 +811,11 @@ spec:
           toFieldPath: spec.forProvider.principalArn
           policy:
             fromFieldPath: Optional
+      readinessChecks:	
+        - matchCondition:	
+            status: 'True'	
+            type: Ready	
+          type: MatchCondition
     - base:
         apiVersion: eks.aws.crossplane.io/v1alpha1
         kind: AccessEntry
@@ -837,6 +842,11 @@ spec:
           toFieldPath: spec.forProvider.principalArn
           policy:
             fromFieldPath: Optional
+      readinessChecks:	
+        - matchCondition:	
+            status: 'True'	
+            type: Ready	
+          type: MatchCondition
     - base:
         apiVersion: eks.aws.crossplane.io/v1alpha1
         kind: AccessEntry
@@ -863,6 +873,11 @@ spec:
           toFieldPath: spec.forProvider.principalArn
           policy:
             fromFieldPath: Optional
+      readinessChecks:	
+        - matchCondition:	
+            status: 'True'	
+            type: Ready	
+          type: MatchCondition
     - base:
         apiVersion: eks.aws.crossplane.io/v1alpha1
         kind: AccessEntry
@@ -889,4 +904,9 @@ spec:
           toFieldPath: spec.forProvider.principalArn
           policy:
             fromFieldPath: Optional
+      readinessChecks:	
+        - matchCondition:	
+            status: 'True'	
+            type: Ready	
+          type: MatchCondition
   writeConnectionSecretsToNamespace: crossplane-system
