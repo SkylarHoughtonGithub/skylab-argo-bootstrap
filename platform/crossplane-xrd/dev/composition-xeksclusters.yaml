@@ -794,8 +794,12 @@ spec:
             type: STANDARD
             kubernetesGroups:
               - system:masters
+            region:
       name: admin-access-entry-1
       patches:
+        - fromFieldPath: spec.region
+          toFieldPath: spec.forProvider.region
+          type: FromCompositeFieldPath
         - fromFieldPath: spec.clusterName
           toFieldPath: spec.forProvider.clusterNameRef.name
           type: FromCompositeFieldPath
@@ -827,6 +831,9 @@ spec:
               - system:masters
       name: admin-access-entry-2
       patches:
+        - fromFieldPath: spec.region
+          toFieldPath: spec.forProvider.region
+          type: FromCompositeFieldPath
         - fromFieldPath: spec.clusterName
           toFieldPath: spec.forProvider.clusterNameRef.name
           type: FromCompositeFieldPath
@@ -858,6 +865,9 @@ spec:
               - system:authenticated
       name: readonly-access-entry-1
       patches:
+        - fromFieldPath: spec.region
+          toFieldPath: spec.forProvider.region
+          type: FromCompositeFieldPath
         - fromFieldPath: spec.clusterName
           toFieldPath: spec.forProvider.clusterNameRef.name
           type: FromCompositeFieldPath
@@ -889,6 +899,9 @@ spec:
               - system:authenticated
       name: readonly-access-entry-2
       patches:
+        - fromFieldPath: spec.region
+          toFieldPath: spec.forProvider.region
+          type: FromCompositeFieldPath
         - fromFieldPath: spec.clusterName
           toFieldPath: spec.forProvider.clusterNameRef.name
           type: FromCompositeFieldPath
