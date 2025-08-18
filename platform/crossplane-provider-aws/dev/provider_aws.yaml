@@ -6,3 +6,11 @@ metadata:
 spec:
   package: xpkg.upbound.io/crossplane-contrib/provider-aws:v0.54.2
   packagePullPolicy: IfNotPresent
+---
+apiVersion: pkg.crossplane.io/v1
+kind: Provider
+metadata:
+  name: provider-aws-eks
+spec:
+  package: xpkg.upbound.io/upbound/provider-aws-eks:v1.23.2
+  packagePullPolicy: IfNotPresent
