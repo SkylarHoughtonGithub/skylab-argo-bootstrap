@@ -71,7 +71,7 @@ spec:
               kubernetesVersion:
                 type: string
                 description: "Kubernetes version"
-                default: "1.28"
+                default: "1.33"
               nodeCount:
                 type: integer
                 description: "Desired number of nodes"
