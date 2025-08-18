@@ -128,8 +128,6 @@ spec:
           providerConfigRef:
             name: default
       name: subnet-1
-      dependsOn:
-        - vpc
       patches:
         - fromFieldPath: spec.region
           toFieldPath: spec.forProvider.region
@@ -191,8 +189,6 @@ spec:
           providerConfigRef:
             name: default
       name: subnet-2
-      dependsOn:
-        - vpc
       patches:
         - fromFieldPath: spec.region
           toFieldPath: spec.forProvider.region
@@ -260,11 +256,6 @@ spec:
           providerConfigRef:
             name: default
       name: route-table
-      dependsOn:
-        - vpc
-        - igw
-        - subnet-1
-        - subnet-2
       patches:
         - fromFieldPath: spec.region
           toFieldPath: spec.forProvider.region
@@ -351,8 +342,6 @@ spec:
           providerConfigRef:
             name: default
       name: security-group
-      dependsOn:
-        - vpc
       patches:
         - fromFieldPath: spec.region
           toFieldPath: spec.forProvider.region
@@ -648,13 +637,6 @@ spec:
           writeConnectionSecretToRef:
             namespace: crossplane-system
       name: eks-cluster
-      dependsOn:
-        - vpc
-        - subnet-1
-        - subnet-2
-        - security-group
-        - cluster-role
-        - cluster-policy
       patches:
         - fromFieldPath: spec.region
           toFieldPath: spec.forProvider.region
@@ -736,14 +718,6 @@ spec:
           providerConfigRef:
             name: default
       name: nodegroup
-      dependsOn:
-        - eks-cluster
-        - node-role
-        - worker-node-policy
-        - cni-policy
-        - ecr-policy
-        - subnet-1
-        - subnet-2
       patches:
         - fromFieldPath: spec.region
           toFieldPath: spec.forProvider.region
