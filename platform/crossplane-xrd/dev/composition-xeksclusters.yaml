@@ -785,4 +785,108 @@ spec:
             status: 'True'
             type: Ready
           type: MatchCondition
+    - base:
+        apiVersion: eks.aws.crossplane.io/v1alpha1
+        kind: AccessEntry
+        spec:
+          forProvider:
+            principalArn: ""
+            type: STANDARD
+            kubernetesGroups:
+              - system:masters
+      name: admin-access-entry-1
+      patches:
+        - fromFieldPath: spec.clusterName
+          toFieldPath: spec.forProvider.clusterNameRef.name
+          type: FromCompositeFieldPath
+        - type: CombineFromComposite
+          combine:
+            variables:
+              - fromFieldPath: spec.awsAccountId
+              - fromFieldPath: spec.adminPrincipals[0].type
+              - fromFieldPath: spec.adminPrincipals[0].name
+            strategy: string
+            string:
+              fmt: "arn:aws:iam::%s:%s/%s"
+          toFieldPath: spec.forProvider.principalArn
+          policy:
+            fromFieldPath: Optional
+    - base:
+        apiVersion: eks.aws.crossplane.io/v1alpha1
+        kind: AccessEntry
+        spec:
+          forProvider:
+            principalArn: ""
+            type: STANDARD
+            kubernetesGroups:
+              - system:masters
+      name: admin-access-entry-2
+      patches:
+        - fromFieldPath: spec.clusterName
+          toFieldPath: spec.forProvider.clusterNameRef.name
+          type: FromCompositeFieldPath
+        - type: CombineFromComposite
+          combine:
+            variables:
+              - fromFieldPath: spec.awsAccountId
+              - fromFieldPath: spec.adminPrincipals[1].type
+              - fromFieldPath: spec.adminPrincipals[1].name
+            strategy: string
+            string:
+              fmt: "arn:aws:iam::%s:%s/%s"
+          toFieldPath: spec.forProvider.principalArn
+          policy:
+            fromFieldPath: Optional
+    - base:
+        apiVersion: eks.aws.crossplane.io/v1alpha1
+        kind: AccessEntry
+        spec:
+          forProvider:
+            principalArn: ""
+            type: STANDARD
+            kubernetesGroups:
+              - system:authenticated
+      name: readonly-access-entry-1
+      patches:
+        - fromFieldPath: spec.clusterName
+          toFieldPath: spec.forProvider.clusterNameRef.name
+          type: FromCompositeFieldPath
+        - type: CombineFromComposite
+          combine:
+            variables:
+              - fromFieldPath: spec.awsAccountId
+              - fromFieldPath: spec.readonlyPrincipals[0].type
+              - fromFieldPath: spec.readonlyPrincipals[0].name
+            strategy: string
+            string:
+              fmt: "arn:aws:iam::%s:%s/%s"
+          toFieldPath: spec.forProvider.principalArn
+          policy:
+            fromFieldPath: Optional
+    - base:
+        apiVersion: eks.aws.crossplane.io/v1alpha1
+        kind: AccessEntry
+        spec:
+          forProvider:
+            principalArn: ""
+            type: STANDARD
+            kubernetesGroups:
+              - system:authenticated
+      name: readonly-access-entry-2
+      patches:
+        - fromFieldPath: spec.clusterName
+          toFieldPath: spec.forProvider.clusterNameRef.name
+          type: FromCompositeFieldPath
+        - type: CombineFromComposite
+          combine:
+            variables:
+              - fromFieldPath: spec.awsAccountId
+              - fromFieldPath: spec.readonlyPrincipals[1].type
+              - fromFieldPath: spec.readonlyPrincipals[1].name
+            strategy: string
+            string:
+              fmt: "arn:aws:iam::%s:%s/%s"
+          toFieldPath: spec.forProvider.principalArn
+          policy:
+            fromFieldPath: Optional
   writeConnectionSecretsToNamespace: crossplane-system
