@@ -2,10 +2,16 @@
 apiVersion: pkg.crossplane.io/v1
 kind: Provider
 metadata:
-  name: provider-aws
+  name: upbound-provider-aws-ec2
 spec:
-  package: xpkg.upbound.io/crossplane-contrib/provider-aws:v0.54.2
-  packagePullPolicy: IfNotPresent
+  package: xpkg.upbound.io/upbound/provider-aws-ec2:v2
+---
+apiVersion: pkg.crossplane.io/v1
+kind: Provider
+metadata:
+  name: upbound-provider-aws-iam
+spec:
+  package: xpkg.upbound.io/upbound/provider-aws-iam:v2
 ---
 apiVersion: pkg.crossplane.io/v1
 kind: Provider
