@@ -296,11 +296,6 @@ spec:
         - fromFieldPath: spec.clusterName
           toFieldPath: spec.forProvider.clusterNameRef.name
           type: FromCompositeFieldPath
-        - fromFieldPath: spec.addons.vpcCni.version
-          toFieldPath: spec.forProvider.addonVersion
-          type: FromCompositeFieldPath
-          policy:
-            fromFieldPath: Optional
       readinessChecks:
         - matchCondition:
             status: 'True'
@@ -337,11 +332,6 @@ spec:
         - fromFieldPath: spec.clusterName
           toFieldPath: spec.forProvider.clusterNameRef.name
           type: FromCompositeFieldPath
-        - fromFieldPath: spec.addons.coreDns.version
-          toFieldPath: spec.forProvider.addonVersion
-          type: FromCompositeFieldPath
-          policy:
-            fromFieldPath: Optional
       readinessChecks:
         - matchCondition:
             status: 'True'
@@ -378,11 +368,6 @@ spec:
         - fromFieldPath: spec.clusterName
           toFieldPath: spec.forProvider.clusterNameRef.name
           type: FromCompositeFieldPath
-        - fromFieldPath: spec.addons.kubeProxy.version
-          toFieldPath: spec.forProvider.addonVersion
-          type: FromCompositeFieldPath
-          policy:
-            fromFieldPath: Optional
       readinessChecks:
         - matchCondition:
             status: 'True'

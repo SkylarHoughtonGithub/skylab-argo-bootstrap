@@ -157,30 +157,7 @@ spec:
                   capacityType: "ON_DEMAND"
                   amiType: "AL2_x86_64"
                   diskSize: 20
-              
-              # EKS Add-ons configuration
-              addons:
-                type: object
-                description: "EKS add-ons configuration"
-                properties:
-                  vpcCni:
-                    type: object
-                    properties:
-                      version:
-                        type: string
-                        description: "VPC CNI add-on version"
-                  coreDns:
-                    type: object
-                    properties:
-                      version:
-                        type: string
-                        description: "CoreDNS add-on version"
-                  kubeProxy:
-                    type: object
-                    properties:
-                      version:
-                        type: string
-                        description: "kube-proxy add-on version"
+
             required:
               - clusterName
               - networkName
@@ -203,11 +180,6 @@ spec:
               nodeGroupStatus:
                 type: string
                 description: "EKS node group status"
-              addonsStatus:
-                type: object
-                description: "Status of EKS add-ons"
-                additionalProperties:
-                  type: string
   claimNames:
     kind: EKSCluster
     plural: eksclusters
