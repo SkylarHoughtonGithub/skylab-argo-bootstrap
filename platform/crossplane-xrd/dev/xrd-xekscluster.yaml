@@ -166,43 +166,21 @@ spec:
                   vpcCni:
                     type: object
                     properties:
-                      enabled:
-                        type: boolean
-                        default: true
                       version:
                         type: string
                         description: "VPC CNI add-on version"
-                    default:
-                      enabled: true
                   coreDns:
                     type: object
                     properties:
-                      enabled:
-                        type: boolean
-                        default: true
                       version:
                         type: string
                         description: "CoreDNS add-on version"
-                    default:
-                      enabled: true
                   kubeProxy:
                     type: object
                     properties:
-                      enabled:
-                        type: boolean
-                        default: true
                       version:
                         type: string
                         description: "kube-proxy add-on version"
-                    default:
-                      enabled: true
-                default:
-                  vpcCni:
-                    enabled: true
-                  coreDns:
-                    enabled: true
-                  kubeProxy:
-                    enabled: true
             required:
               - clusterName
               - networkName

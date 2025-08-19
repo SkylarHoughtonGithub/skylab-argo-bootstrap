@@ -266,7 +266,6 @@ spec:
         - fromFieldPath: metadata.name
           name: nodegroup-name
 
-    # Optional: EKS Add-ons
     - base:
         apiVersion: eks.aws.upbound.io/v1beta1
         kind: Addon
@@ -299,16 +298,6 @@ spec:
           type: FromCompositeFieldPath
         - fromFieldPath: spec.addons.vpcCni.version
           toFieldPath: spec.forProvider.addonVersion
-          type: FromCompositeFieldPath
-          policy:
-            fromFieldPath: Optional
-        - fromFieldPath: spec.addons.vpcCni.enabled
-          toFieldPath: metadata.annotations["crossplane.io/external-name"]
-          transforms:
-            - type: map
-              map:
-                "true": "enabled"
-                "false": "disabled"
           type: FromCompositeFieldPath
           policy:
             fromFieldPath: Optional
@@ -353,16 +342,6 @@ spec:
           type: FromCompositeFieldPath
           policy:
             fromFieldPath: Optional
-        - fromFieldPath: spec.addons.coreDns.enabled
-          toFieldPath: metadata.annotations["crossplane.io/external-name"]
-          transforms:
-            - type: map
-              map:
-                "true": "enabled"
-                "false": "disabled"
-          type: FromCompositeFieldPath
-          policy:
-            fromFieldPath: Optional
       readinessChecks:
         - matchCondition:
             status: 'True'
@@ -401,16 +380,6 @@ spec:
           type: FromCompositeFieldPath
         - fromFieldPath: spec.addons.kubeProxy.version
           toFieldPath: spec.forProvider.addonVersion
-          type: FromCompositeFieldPath
-          policy:
-            fromFieldPath: Optional
-        - fromFieldPath: spec.addons.kubeProxy.enabled
-          toFieldPath: metadata.annotations["crossplane.io/external-name"]
-          transforms:
-            - type: map
-              map:
-                "true": "enabled"
-                "false": "disabled"
           type: FromCompositeFieldPath
           policy:
             fromFieldPath: Optional
