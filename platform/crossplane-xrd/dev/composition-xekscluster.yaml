@@ -46,21 +46,16 @@ spec:
         - fromFieldPath: spec.clusterName
           toFieldPath: metadata.name
           type: FromCompositeFieldPath
-        # Reference to RBAC composition connection secret for cluster role
-        - fromFieldPath: spec.clusterName
-          toFieldPath: spec.forProvider.roleArnSelector.matchLabels["rbac.infrastructure.skylab.com/cluster-name"]
+        # Reference to RBAC composition for cluster role ARN
+        - fromFieldPath: spec.rbacName
+          toFieldPath: spec.forProvider.roleArnRef.name
+          transforms:
+            - string:
+                fmt: '%s-cluster-role'
+                type: Format
+              type: string
           type: FromCompositeFieldPath
-        - type: FromEnvironmentFieldPath
-          fromFieldPath: clusterRoleArn
-          toFieldPath: spec.forProvider.roleArn
         # Reference to Network composition resources for VPC config
-        - fromFieldPath: spec.clusterName
-          toFieldPath: spec.forProvider.vpcConfig[0].securityGroupIdSelector.matchLabels["network.infrastructure.skylab.com/cluster-name"]
-          type: FromCompositeFieldPath
-        - fromFieldPath: spec.clusterName
-          toFieldPath: spec.forProvider.vpcConfig[0].subnetIdSelector.matchLabels["network.infrastructure.skylab.com/cluster-name"]
-          type: FromCompositeFieldPath
-        # Alternative: Direct references if using same-namespace resources
         - fromFieldPath: spec.networkName
           toFieldPath: spec.forProvider.vpcConfig[0].securityGroupIdRefs[0].name
           transforms:
@@ -170,10 +165,6 @@ spec:
           toFieldPath: spec.forProvider.clusterNameRef.name
           type: FromCompositeFieldPath
         # Reference to RBAC composition for node role ARN
-        - type: FromEnvironmentFieldPath
-          fromFieldPath: nodeRoleArn
-          toFieldPath: spec.forProvider.nodeRoleArn
-        # Alternative: Direct reference if using same-namespace resources
         - fromFieldPath: spec.rbacName
           toFieldPath: spec.forProvider.nodeRoleArnRef.name
           transforms:
