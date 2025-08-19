@@ -25,10 +25,6 @@ spec:
                 type: string
                 description: "Environment (dev, staging, prod)"
                 default: dev
-              includeEbsCsiPolicy:
-                type: boolean
-                description: "Whether to include EBS CSI driver policy for node role"
-                default: true
               customPolicies:
                 type: array
                 description: "Additional custom policy ARNs to attach to node role"
@@ -71,6 +67,12 @@ spec:
                 description: "List of attached policy ARNs"
                 items:
                   type: string
+                default: 
+                  - "arn:aws:iam::aws:policy/AmazonEKSClusterPolicy"
+                  - "arn:aws:iam::aws:policy/AmazonEKSWorkerNodePolicy"
+                  - "arn:aws:iam::aws:policy/AmazonEKS_CNI_Policy"
+                  - "arn:aws:iam::aws:policy/AmazonEC2ContainerRegistryReadOnly"
+                  - "arn:aws:iam::aws:policy/service-role/AmazonEBSCSIDriverPolicy"
   claimNames:
     kind: ClusterRBAC
     plural: clusterrbacs

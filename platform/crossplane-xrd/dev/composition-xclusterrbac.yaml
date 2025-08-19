@@ -258,7 +258,7 @@ spec:
             type: Ready
           type: MatchCondition
 
-    # Optional: Additional EBS CSI Driver Policy for modern EKS clusters
+    # EBS CSI Driver Policy - Required for modern EKS clusters
     - base:
         apiVersion: iam.aws.upbound.io/v1beta1
         kind: RolePolicyAttachment
@@ -287,16 +287,6 @@ spec:
                 type: Format
               type: string
           type: FromCompositeFieldPath
-        - fromFieldPath: spec.includeEbsCsiPolicy
-          toFieldPath: metadata.annotations["crossplane.io/external-name"]
-          transforms:
-            - type: map
-              map:
-                "true": "enabled"
-                "false": "disabled"
-          type: FromCompositeFieldPath
-          policy:
-            fromFieldPath: Optional
       readinessChecks:
         - matchCondition:
             status: 'True'
