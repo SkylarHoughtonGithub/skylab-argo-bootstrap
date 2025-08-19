@@ -6,6 +6,8 @@ resources:
 - xrd-xnetwork.yaml
 - xrd-xclusterrbac.yaml
 - xrd-xekscluster.yaml
+- xrd-xeksaccessentries.yaml
 - composition-xnetwork.yaml
 - composition-xclusterrbac.yaml
 - composition-xekscluster.yaml
+- composition-xeksaccessentries.yaml
