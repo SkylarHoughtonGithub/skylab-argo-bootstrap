@@ -98,6 +98,8 @@ spec:
                 items:
                   type: string
                 default: ["68.52.182.6/32"]
+            required:
+              - clusterName
           status:
             type: object
             properties:
@@ -107,3 +109,15 @@ spec:
               clusterStatus:
                 type: string
                 description: "EKS cluster status"
+              clusterArn:
+                type: string
+                description: "EKS cluster ARN"
+              nodeGroupStatus:
+                type: string
+                description: "Node group status"
+              vpcId:
+                type: string
+                description: "VPC ID"
+  claimNames:
+    kind: EKSCluster
+    plural: eksclusters

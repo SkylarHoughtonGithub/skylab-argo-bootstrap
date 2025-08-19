@@ -616,18 +616,18 @@ spec:
             type: Ready
           type: MatchCondition
     - base:
-        apiVersion: eks.aws.crossplane.io/v1beta1
+        apiVersion: eks.aws.upbound.io/v1beta1
         kind: Cluster
         spec:
           forProvider:
-            resourcesVpcConfig:
-              endpointPrivateAccess: false
-              endpointPublicAccess: true
-              securityGroupIdRefs:
-                - name: ""
-              subnetIdRefs:
-                - name: ""
-                - name: ""
+            vpcConfig:
+              - endpointConfigPrivateAccess: false
+                endpointConfigPublicAccess: true
+                securityGroupIdRefs:
+                  - name: ""
+                subnetIdRefs:
+                  - name: ""
+                  - name: ""
             tags:
               ManagedBy: crossplane
               Environment: ""
@@ -656,7 +656,7 @@ spec:
               type: string
           type: FromCompositeFieldPath
         - fromFieldPath: spec.clusterName
-          toFieldPath: spec.forProvider.resourcesVpcConfig.securityGroupIdRefs[0].name
+          toFieldPath: spec.forProvider.vpcConfig[0].securityGroupIdRefs[0].name
           transforms:
             - string:
                 fmt: '%s-sg'
@@ -664,7 +664,7 @@ spec:
               type: string
           type: FromCompositeFieldPath
         - fromFieldPath: spec.clusterName
-          toFieldPath: spec.forProvider.resourcesVpcConfig.subnetIdRefs[0].name
+          toFieldPath: spec.forProvider.vpcConfig[0].subnetIdRefs[0].name
           transforms:
             - string:
                 fmt: '%s-subnet-1'
@@ -672,7 +672,7 @@ spec:
               type: string
           type: FromCompositeFieldPath
         - fromFieldPath: spec.clusterName
-          toFieldPath: spec.forProvider.resourcesVpcConfig.subnetIdRefs[1].name
+          toFieldPath: spec.forProvider.vpcConfig[0].subnetIdRefs[1].name
           transforms:
             - string:
                 fmt: '%s-subnet-2'
@@ -702,13 +702,13 @@ spec:
             type: Ready
           type: MatchCondition
     - base:
-        apiVersion: eks.aws.crossplane.io/v1alpha1
+        apiVersion: eks.aws.upbound.io/v1beta1
         kind: NodeGroup
         spec:
           forProvider:
             scalingConfig:
-              minSize: 1
-            subnetRefs:
+              - minSize: 1
+            subnetIdRefs:
               - name: ""
               - name: ""
             tags:
@@ -734,7 +734,7 @@ spec:
           toFieldPath: spec.forProvider.clusterNameRef.name
           type: FromCompositeFieldPath
         - fromFieldPath: spec.clusterName
-          toFieldPath: spec.forProvider.nodeRoleRef.name
+          toFieldPath: spec.forProvider.nodeRoleArnRef.name
           transforms:
             - string:
                 fmt: '%s-node-role'
@@ -742,7 +742,7 @@ spec:
               type: string
           type: FromCompositeFieldPath
         - fromFieldPath: spec.clusterName
-          toFieldPath: spec.forProvider.subnetRefs[0].name
+          toFieldPath: spec.forProvider.subnetIdRefs[0].name
           transforms:
             - string:
                 fmt: '%s-subnet-1'
@@ -750,7 +750,7 @@ spec:
               type: string
           type: FromCompositeFieldPath
         - fromFieldPath: spec.clusterName
-          toFieldPath: spec.forProvider.subnetRefs[1].name
+          toFieldPath: spec.forProvider.subnetIdRefs[1].name
           transforms:
             - string:
                 fmt: '%s-subnet-2'
@@ -758,10 +758,10 @@ spec:
               type: string
           type: FromCompositeFieldPath
         - fromFieldPath: spec.nodeCount
-          toFieldPath: spec.forProvider.scalingConfig.desiredSize
+          toFieldPath: spec.forProvider.scalingConfig[0].desiredSize
           type: FromCompositeFieldPath
         - fromFieldPath: spec.nodeCount
-          toFieldPath: spec.forProvider.scalingConfig.maxSize
+          toFieldPath: spec.forProvider.scalingConfig[0].maxSize
           type: FromCompositeFieldPath
         - fromFieldPath: spec.nodeSize
           toFieldPath: spec.forProvider.instanceTypes[0]
@@ -794,7 +794,6 @@ spec:
             type: STANDARD
             kubernetesGroups:
               - system:masters
-            region:
       name: admin-access-entry-1
       patches:
         - fromFieldPath: spec.region
