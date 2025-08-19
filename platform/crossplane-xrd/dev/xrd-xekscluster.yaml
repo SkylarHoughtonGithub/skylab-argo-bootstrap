@@ -1,0 +1,235 @@
+apiVersion: apiextensions.crossplane.io/v1
+kind: CompositeResourceDefinition
+metadata:
+  name: xeksclusters.infrastructure.skylab.com
+spec:
+  group: infrastructure.skylab.com
+  names:
+    kind: XEKSCluster
+    plural: xeksclusters
+  versions:
+  - name: v1alpha1
+    served: true
+    referenceable: true
+    schema:
+      openAPIV3Schema:
+        type: object
+        properties:
+          spec:
+            type: object
+            properties:
+              clusterName:
+                type: string
+                description: "Name of the EKS cluster"
+              region:
+                type: string
+                description: "AWS region"
+                default: "us-east-2"
+              environment:
+                type: string
+                description: "Environment (dev, staging, prod)"
+                default: dev
+              clusterType:
+                type: string
+                description: "Cluster type (standard, gpu-enabled, etc.)"
+                default: standard
+              kubernetesVersion:
+                type: string
+                description: "Kubernetes version"
+                default: "1.33"
+              
+              # References to other compositions
+              networkName:
+                type: string
+                description: "Name of the network composition to reference"
+              rbacName:
+                type: string
+                description: "Name of the RBAC composition to reference"
+              
+              # Endpoint access configuration
+              endpointAccess:
+                type: object
+                description: "EKS cluster endpoint access configuration"
+                properties:
+                  private:
+                    type: boolean
+                    description: "Enable private endpoint access"
+                    default: false
+                  public:
+                    type: boolean
+                    description: "Enable public endpoint access"
+                    default: true
+                  publicAccessCidrs:
+                    type: array
+                    description: "CIDR blocks allowed for public endpoint access"
+                    items:
+                      type: string
+                    default: ["0.0.0.0/0"]
+                default:
+                  private: false
+                  public: true
+                  publicAccessCidrs: ["0.0.0.0/0"]
+              
+              # Node group configuration
+              nodeGroup:
+                type: object
+                description: "EKS node group configuration"
+                properties:
+                  desiredSize:
+                    type: integer
+                    description: "Desired number of nodes"
+                    default: 1
+                    minimum: 0
+                    maximum: 100
+                  minSize:
+                    type: integer
+                    description: "Minimum number of nodes"
+                    default: 1
+                    minimum: 0
+                    maximum: 100
+                  maxSize:
+                    type: integer
+                    description: "Maximum number of nodes"
+                    default: 3
+                    minimum: 1
+                    maximum: 100
+                  instanceTypes:
+                    type: array
+                    description: "EC2 instance types for nodes"
+                    items:
+                      type: string
+                    default: ["t3.medium"]
+                  capacityType:
+                    type: string
+                    description: "Node capacity type"
+                    enum: ["ON_DEMAND", "SPOT"]
+                    default: "ON_DEMAND"
+                  amiType:
+                    type: string
+                    description: "AMI type for nodes"
+                    enum: ["AL2_x86_64", "AL2_x86_64_GPU", "AL2_ARM_64", "CUSTOM", "BOTTLEROCKET_ARM_64", "BOTTLEROCKET_x86_64"]
+                    default: "AL2_x86_64"
+                  diskSize:
+                    type: integer
+                    description: "Node disk size in GB"
+                    default: 20
+                    minimum: 20
+                    maximum: 100
+                  labels:
+                    type: object
+                    description: "Kubernetes labels for nodes"
+                    additionalProperties:
+                      type: string
+                  taints:
+                    type: array
+                    description: "Kubernetes taints for nodes"
+                    items:
+                      type: object
+                      properties:
+                        key:
+                          type: string
+                        value:
+                          type: string
+                        effect:
+                          type: string
+                          enum: ["NO_SCHEDULE", "NO_EXECUTE", "PREFER_NO_SCHEDULE"]
+                      required:
+                        - key
+                        - effect
+                  updateConfig:
+                    type: object
+                    description: "Node group update configuration"
+                    properties:
+                      maxUnavailable:
+                        type: integer
+                        description: "Maximum number of nodes unavailable during update"
+                        minimum: 1
+                      maxUnavailablePercentage:
+                        type: integer
+                        description: "Maximum percentage of nodes unavailable during update"
+                        minimum: 1
+                        maximum: 100
+                default:
+                  desiredSize: 1
+                  minSize: 1
+                  maxSize: 3
+                  instanceTypes: ["t3.medium"]
+                  capacityType: "ON_DEMAND"
+                  amiType: "AL2_x86_64"
+                  diskSize: 20
+              
+              # EKS Add-ons configuration
+              addons:
+                type: object
+                description: "EKS add-ons configuration"
+                properties:
+                  vpcCni:
+                    type: object
+                    properties:
+                      enabled:
+                        type: boolean
+                        default: true
+                      version:
+                        type: string
+                        description: "VPC CNI add-on version"
+                    default:
+                      enabled: true
+                  coreDns:
+                    type: object
+                    properties:
+                      enabled:
+                        type: boolean
+                        default: true
+                      version:
+                        type: string
+                        description: "CoreDNS add-on version"
+                    default:
+                      enabled: true
+                  kubeProxy:
+                    type: object
+                    properties:
+                      enabled:
+                        type: boolean
+                        default: true
+                      version:
+                        type: string
+                        description: "kube-proxy add-on version"
+                    default:
+                      enabled: true
+                default:
+                  vpcCni:
+                    enabled: true
+                  coreDns:
+                    enabled: true
+                  kubeProxy:
+                    enabled: true
+            required:
+              - clusterName
+              - networkName
+              - rbacName
+          status:
+            type: object
+            properties:
+              clusterEndpoint:
+                type: string
+                description: "EKS cluster endpoint"
+              clusterStatus:
+                type: string
+                description: "EKS cluster status"
+              clusterArn:
+                type: string
+                description: "EKS cluster ARN"
+              nodeGroupArn:
+                type: string
+                description: "EKS node group ARN"
+              nodeGroupStatus:
+                type: string
+                description: "EKS node group status"
+              addonsStatus:
+                type: object
+                description: "Status of EKS add-ons"
+                additionalProperties:
+                  type: string
+  claimNames:
+    kind: EKSCluster
+    plural: eksclusters

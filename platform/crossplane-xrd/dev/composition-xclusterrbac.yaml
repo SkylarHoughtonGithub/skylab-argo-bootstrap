@@ -1,0 +1,306 @@
+---
+apiVersion: apiextensions.crossplane.io/v1
+kind: Composition
+metadata:
+  labels:
+    provider: aws
+    service: iam
+  name: cluster-rbac-composition
+spec:
+  compositeTypeRef:
+    apiVersion: infrastructure.skylab.com/v1alpha1
+    kind: XClusterRBAC
+  mode: Resources
+  publishConnectionDetailsWithStoreConfigRef:
+    name: default
+  resources:
+    - base:
+        apiVersion: iam.aws.upbound.io/v1beta1
+        kind: Role
+        spec:
+          forProvider:
+            assumeRolePolicy: |
+              {
+                "Version": "2012-10-17",
+                "Statement": [
+                  {
+                    "Effect": "Allow",
+                    "Principal": {
+                      "Service": "eks.amazonaws.com"
+                    },
+                    "Action": "sts:AssumeRole"
+                  }
+                ]
+              }
+            tags:
+              ManagedBy: crossplane
+              Environment: ""
+              RoleType: eks-cluster
+          providerConfigRef:
+            name: default
+      name: cluster-role
+      patches:
+        - fromFieldPath: spec.clusterName
+          toFieldPath: metadata.name
+          transforms:
+            - string:
+                fmt: '%s-cluster-role'
+                type: Format
+              type: string
+          type: FromCompositeFieldPath
+        - fromFieldPath: spec.clusterName
+          toFieldPath: spec.forProvider.tags.ManagedBy
+          transforms:
+            - string:
+                fmt: '%s-cluster-role'
+                type: Format
+              type: string
+          type: FromCompositeFieldPath
+        - fromFieldPath: spec.environment
+          toFieldPath: spec.forProvider.tags.Environment
+          type: FromCompositeFieldPath
+      readinessChecks:
+        - matchCondition:
+            status: 'True'
+            type: Ready
+          type: MatchCondition
+      connectionDetails:
+        - fromFieldPath: status.atProvider.arn
+          name: cluster-role-arn
+
+    - base:
+        apiVersion: iam.aws.upbound.io/v1beta1
+        kind: RolePolicyAttachment
+        spec:
+          forProvider:
+            policyArn: arn:aws:iam::aws:policy/AmazonEKSClusterPolicy
+            roleRef:
+              name: ""
+          providerConfigRef:
+            name: default
+      name: cluster-policy
+      patches:
+        - fromFieldPath: spec.clusterName
+          toFieldPath: metadata.name
+          transforms:
+            - string:
+                fmt: '%s-cluster-policy'
+                type: Format
+              type: string
+          type: FromCompositeFieldPath
+        - fromFieldPath: spec.clusterName
+          toFieldPath: spec.forProvider.roleRef.name
+          transforms:
+            - string:
+                fmt: '%s-cluster-role'
+                type: Format
+              type: string
+          type: FromCompositeFieldPath
+      readinessChecks:
+        - matchCondition:
+            status: 'True'
+            type: Ready
+          type: MatchCondition
+
+    - base:
+        apiVersion: iam.aws.upbound.io/v1beta1
+        kind: Role
+        spec:
+          forProvider:
+            assumeRolePolicy: |
+              {
+                "Version": "2012-10-17",
+                "Statement": [
+                  {
+                    "Effect": "Allow",
+                    "Principal": {
+                      "Service": "ec2.amazonaws.com"
+                    },
+                    "Action": "sts:AssumeRole"
+                  }
+                ]
+              }
+            tags:
+              ManagedBy: crossplane
+              Environment: ""
+              RoleType: eks-nodegroup
+          providerConfigRef:
+            name: default
+      name: node-role
+      patches:
+        - fromFieldPath: spec.clusterName
+          toFieldPath: metadata.name
+          transforms:
+            - string:
+                fmt: '%s-node-role'
+                type: Format
+              type: string
+          type: FromCompositeFieldPath
+        - fromFieldPath: spec.clusterName
+          toFieldPath: spec.forProvider.tags.ManagedBy
+          transforms:
+            - string:
+                fmt: '%s-node-role'
+                type: Format
+              type: string
+          type: FromCompositeFieldPath
+        - fromFieldPath: spec.environment
+          toFieldPath: spec.forProvider.tags.Environment
+          type: FromCompositeFieldPath
+      readinessChecks:
+        - matchCondition:
+            status: 'True'
+            type: Ready
+          type: MatchCondition
+      connectionDetails:
+        - fromFieldPath: status.atProvider.arn
+          name: node-role-arn
+
+    - base:
+        apiVersion: iam.aws.upbound.io/v1beta1
+        kind: RolePolicyAttachment
+        spec:
+          forProvider:
+            policyArn: arn:aws:iam::aws:policy/AmazonEKSWorkerNodePolicy
+            roleRef:
+              name: ""
+          providerConfigRef:
+            name: default
+      name: worker-node-policy
+      patches:
+        - fromFieldPath: spec.clusterName
+          toFieldPath: metadata.name
+          transforms:
+            - string:
+                fmt: '%s-worker-node-policy'
+                type: Format
+              type: string
+          type: FromCompositeFieldPath
+        - fromFieldPath: spec.clusterName
+          toFieldPath: spec.forProvider.roleRef.name
+          transforms:
+            - string:
+                fmt: '%s-node-role'
+                type: Format
+              type: string
+          type: FromCompositeFieldPath
+      readinessChecks:
+        - matchCondition:
+            status: 'True'
+            type: Ready
+          type: MatchCondition
+
+    - base:
+        apiVersion: iam.aws.upbound.io/v1beta1
+        kind: RolePolicyAttachment
+        spec:
+          forProvider:
+            policyArn: arn:aws:iam::aws:policy/AmazonEKS_CNI_Policy
+            roleRef:
+              name: ""
+          providerConfigRef:
+            name: default
+      name: cni-policy
+      patches:
+        - fromFieldPath: spec.clusterName
+          toFieldPath: metadata.name
+          transforms:
+            - string:
+                fmt: '%s-cni-policy'
+                type: Format
+              type: string
+          type: FromCompositeFieldPath
+        - fromFieldPath: spec.clusterName
+          toFieldPath: spec.forProvider.roleRef.name
+          transforms:
+            - string:
+                fmt: '%s-node-role'
+                type: Format
+              type: string
+          type: FromCompositeFieldPath
+      readinessChecks:
+        - matchCondition:
+            status: 'True'
+            type: Ready
+          type: MatchCondition
+
+    - base:
+        apiVersion: iam.aws.upbound.io/v1beta1
+        kind: RolePolicyAttachment
+        spec:
+          forProvider:
+            policyArn: arn:aws:iam::aws:policy/AmazonEC2ContainerRegistryReadOnly
+            roleRef:
+              name: ""
+          providerConfigRef:
+            name: default
+      name: ecr-policy
+      patches:
+        - fromFieldPath: spec.clusterName
+          toFieldPath: metadata.name
+          transforms:
+            - string:
+                fmt: '%s-ecr-policy'
+                type: Format
+              type: string
+          type: FromCompositeFieldPath
+        - fromFieldPath: spec.clusterName
+          toFieldPath: spec.forProvider.roleRef.name
+          transforms:
+            - string:
+                fmt: '%s-node-role'
+                type: Format
+              type: string
+          type: FromCompositeFieldPath
+      readinessChecks:
+        - matchCondition:
+            status: 'True'
+            type: Ready
+          type: MatchCondition
+
+    # Optional: Additional EBS CSI Driver Policy for modern EKS clusters
+    - base:
+        apiVersion: iam.aws.upbound.io/v1beta1
+        kind: RolePolicyAttachment
+        spec:
+          forProvider:
+            policyArn: arn:aws:iam::aws:policy/service-role/AmazonEBSCSIDriverPolicy
+            roleRef:
+              name: ""
+          providerConfigRef:
+            name: default
+      name: ebs-csi-policy
+      patches:
+        - fromFieldPath: spec.clusterName
+          toFieldPath: metadata.name
+          transforms:
+            - string:
+                fmt: '%s-ebs-csi-policy'
+                type: Format
+              type: string
+          type: FromCompositeFieldPath
+        - fromFieldPath: spec.clusterName
+          toFieldPath: spec.forProvider.roleRef.name
+          transforms:
+            - string:
+                fmt: '%s-node-role'
+                type: Format
+              type: string
+          type: FromCompositeFieldPath
+        - fromFieldPath: spec.includeEbsCsiPolicy
+          toFieldPath: metadata.annotations["crossplane.io/external-name"]
+          transforms:
+            - type: map
+              map:
+                "true": "enabled"
+                "false": "disabled"
+          type: FromCompositeFieldPath
+          policy:
+            fromFieldPath: Optional
+      readinessChecks:
+        - matchCondition:
+            status: 'True'
+            type: Ready
+          type: MatchCondition
+
+  writeConnectionSecretsToNamespace: crossplane-system

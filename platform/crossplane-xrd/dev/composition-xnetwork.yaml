@@ -1,0 +1,600 @@
+---
+apiVersion: apiextensions.crossplane.io/v1
+kind: Composition
+metadata:
+  labels:
+    provider: aws
+    service: networking
+  name: network-composition
+spec:
+  compositeTypeRef:
+    apiVersion: infrastructure.skylab.com/v1alpha1
+    kind: XNetwork
+  mode: Resources
+  publishConnectionDetailsWithStoreConfigRef:
+    name: default
+  resources:
+    - base:
+        apiVersion: ec2.aws.upbound.io/v1beta1
+        kind: VPC
+        spec:
+          forProvider:
+            enableDnsHostnames: true
+            enableDnsSupport: true
+            instanceTenancy: default
+            tags:
+              ManagedBy: crossplane
+              Environment: ""
+              ClusterType: ""
+          providerConfigRef:
+            name: default
+      name: vpc
+      patches:
+        - fromFieldPath: spec.region
+          toFieldPath: spec.forProvider.region
+          type: FromCompositeFieldPath
+        - fromFieldPath: spec.vpcCidr
+          toFieldPath: spec.forProvider.cidrBlock
+          type: FromCompositeFieldPath
+        - fromFieldPath: spec.networkName
+          toFieldPath: metadata.name
+          transforms:
+            - string:
+                fmt: '%s-vpc'
+                type: Format
+              type: string
+          type: FromCompositeFieldPath
+        - fromFieldPath: spec.networkName
+          toFieldPath: spec.forProvider.tags.ManagedBy
+          transforms:
+            - string:
+                fmt: '%s-vpc'
+                type: Format
+              type: string
+          type: FromCompositeFieldPath
+        - fromFieldPath: spec.environment
+          toFieldPath: spec.forProvider.tags.Environment
+          type: FromCompositeFieldPath
+        - fromFieldPath: spec.clusterType
+          toFieldPath: spec.forProvider.tags.ClusterType
+          type: FromCompositeFieldPath
+      readinessChecks:
+        - matchCondition:
+            status: 'True'
+            type: Ready
+          type: MatchCondition
+      connectionDetails:
+        - fromFieldPath: metadata.annotations["crossplane.io/external-name"]
+          name: vpc-id
+        - fromFieldPath: spec.forProvider.cidrBlock
+          name: vpc-cidr
+
+    - base:
+        apiVersion: ec2.aws.upbound.io/v1beta1
+        kind: InternetGateway
+        spec:
+          forProvider:
+            tags:
+              ManagedBy: crossplane
+              Environment: ""
+            vpcIdRef:
+              name: ""
+          providerConfigRef:
+            name: default
+      name: igw
+      patches:
+        - fromFieldPath: spec.region
+          toFieldPath: spec.forProvider.region
+          type: FromCompositeFieldPath
+        - fromFieldPath: spec.networkName
+          toFieldPath: metadata.name
+          transforms:
+            - string:
+                fmt: '%s-igw'
+                type: Format
+              type: string
+          type: FromCompositeFieldPath
+        - fromFieldPath: spec.networkName
+          toFieldPath: spec.forProvider.vpcIdRef.name
+          transforms:
+            - string:
+                fmt: '%s-vpc'
+                type: Format
+              type: string
+          type: FromCompositeFieldPath
+        - fromFieldPath: spec.networkName
+          toFieldPath: spec.forProvider.tags.ManagedBy
+          transforms:
+            - string:
+                fmt: '%s-igw'
+                type: Format
+              type: string
+          type: FromCompositeFieldPath
+        - fromFieldPath: spec.environment
+          toFieldPath: spec.forProvider.tags.Environment
+          type: FromCompositeFieldPath
+      readinessChecks:
+        - matchCondition:
+            status: 'True'
+            type: Ready
+          type: MatchCondition
+      connectionDetails:
+        - fromFieldPath: metadata.annotations["crossplane.io/external-name"]
+          name: igw-id
+
+    - base:
+        apiVersion: ec2.aws.upbound.io/v1beta1
+        kind: Subnet
+        spec:
+          forProvider:
+            mapPublicIpOnLaunch: true
+            tags:
+              ManagedBy: crossplane
+              Environment: ""
+              SubnetType: public
+            vpcIdRef:
+              name: ""
+          providerConfigRef:
+            name: default
+      name: subnet-1
+      patches:
+        - fromFieldPath: spec.region
+          toFieldPath: spec.forProvider.region
+          type: FromCompositeFieldPath
+        - fromFieldPath: spec.region
+          toFieldPath: spec.forProvider.availabilityZone
+          transforms:
+            - string:
+                fmt: '%sa'
+                type: Format
+              type: string
+          type: FromCompositeFieldPath
+        - fromFieldPath: spec.subnetCidrs[0]
+          toFieldPath: spec.forProvider.cidrBlock
+          type: FromCompositeFieldPath
+        - fromFieldPath: spec.networkName
+          toFieldPath: metadata.name
+          transforms:
+            - string:
+                fmt: '%s-subnet-1'
+                type: Format
+              type: string
+          type: FromCompositeFieldPath
+        - fromFieldPath: spec.networkName
+          toFieldPath: spec.forProvider.vpcIdRef.name
+          transforms:
+            - string:
+                fmt: '%s-vpc'
+                type: Format
+              type: string
+          type: FromCompositeFieldPath
+        - fromFieldPath: spec.networkName
+          toFieldPath: spec.forProvider.tags.ManagedBy
+          transforms:
+            - string:
+                fmt: '%s-subnet-1'
+                type: Format
+              type: string
+          type: FromCompositeFieldPath
+        - fromFieldPath: spec.environment
+          toFieldPath: spec.forProvider.tags.Environment
+          type: FromCompositeFieldPath
+      readinessChecks:
+        - matchCondition:
+            status: 'True'
+            type: Ready
+          type: MatchCondition
+      connectionDetails:
+        - fromFieldPath: metadata.annotations["crossplane.io/external-name"]
+          name: subnet-1-id
+
+    - base:
+        apiVersion: ec2.aws.upbound.io/v1beta1
+        kind: Subnet
+        spec:
+          forProvider:
+            mapPublicIpOnLaunch: true
+            tags:
+              ManagedBy: crossplane
+              Environment: ""
+              SubnetType: public
+            vpcIdRef:
+              name: ""
+          providerConfigRef:
+            name: default
+      name: subnet-2
+      patches:
+        - fromFieldPath: spec.region
+          toFieldPath: spec.forProvider.region
+          type: FromCompositeFieldPath
+        - fromFieldPath: spec.region
+          toFieldPath: spec.forProvider.availabilityZone
+          transforms:
+            - string:
+                fmt: '%sc'
+                type: Format
+              type: string
+          type: FromCompositeFieldPath
+        - fromFieldPath: spec.subnetCidrs[1]
+          toFieldPath: spec.forProvider.cidrBlock
+          type: FromCompositeFieldPath
+        - fromFieldPath: spec.networkName
+          toFieldPath: metadata.name
+          transforms:
+            - string:
+                fmt: '%s-subnet-2'
+                type: Format
+              type: string
+          type: FromCompositeFieldPath
+        - fromFieldPath: spec.networkName
+          toFieldPath: spec.forProvider.vpcIdRef.name
+          transforms:
+            - string:
+                fmt: '%s-vpc'
+                type: Format
+              type: string
+          type: FromCompositeFieldPath
+        - fromFieldPath: spec.networkName
+          toFieldPath: spec.forProvider.tags.ManagedBy
+          transforms:
+            - string:
+                fmt: '%s-subnet-2'
+                type: Format
+              type: string
+          type: FromCompositeFieldPath
+        - fromFieldPath: spec.environment
+          toFieldPath: spec.forProvider.tags.Environment
+          type: FromCompositeFieldPath
+      readinessChecks:
+        - matchCondition:
+            status: 'True'
+            type: Ready
+          type: MatchCondition
+      connectionDetails:
+        - fromFieldPath: metadata.annotations["crossplane.io/external-name"]
+          name: subnet-2-id
+
+    - base:
+        apiVersion: ec2.aws.upbound.io/v1beta1
+        kind: RouteTable
+        spec:
+          forProvider:
+            tags:
+              ManagedBy: crossplane
+              Environment: ""
+              RouteTableType: public
+            vpcIdRef:
+              name: ""
+          providerConfigRef:
+            name: default
+      name: route-table
+      patches:
+        - fromFieldPath: spec.region
+          toFieldPath: spec.forProvider.region
+          type: FromCompositeFieldPath
+        - fromFieldPath: spec.networkName
+          toFieldPath: metadata.name
+          transforms:
+            - string:
+                fmt: '%s-public-rt'
+                type: Format
+              type: string
+          type: FromCompositeFieldPath
+        - fromFieldPath: spec.networkName
+          toFieldPath: spec.forProvider.vpcIdRef.name
+          transforms:
+            - string:
+                fmt: '%s-vpc'
+                type: Format
+              type: string
+          type: FromCompositeFieldPath
+        - fromFieldPath: spec.networkName
+          toFieldPath: spec.forProvider.tags.ManagedBy
+          transforms:
+            - string:
+                fmt: '%s-public-rt'
+                type: Format
+              type: string
+          type: FromCompositeFieldPath
+        - fromFieldPath: spec.environment
+          toFieldPath: spec.forProvider.tags.Environment
+          type: FromCompositeFieldPath
+      readinessChecks:
+        - matchCondition:
+            status: 'True'
+            type: Ready
+          type: MatchCondition
+      connectionDetails:
+        - fromFieldPath: metadata.annotations["crossplane.io/external-name"]
+          name: route-table-id
+
+    - base:
+        apiVersion: ec2.aws.upbound.io/v1beta1
+        kind: Route
+        spec:
+          forProvider:
+            destinationCidrBlock: 0.0.0.0/0
+            routeTableIdRef:
+              name: ""
+            gatewayIdRef:
+              name: ""
+          providerConfigRef:
+            name: default
+      name: public-route
+      patches:
+        - fromFieldPath: spec.region
+          toFieldPath: spec.forProvider.region
+          type: FromCompositeFieldPath
+        - fromFieldPath: spec.networkName
+          toFieldPath: metadata.name
+          transforms:
+            - string:
+                fmt: '%s-public-route'
+                type: Format
+              type: string
+          type: FromCompositeFieldPath
+        - fromFieldPath: spec.networkName
+          toFieldPath: spec.forProvider.routeTableIdRef.name
+          transforms:
+            - string:
+                fmt: '%s-public-rt'
+                type: Format
+              type: string
+          type: FromCompositeFieldPath
+        - fromFieldPath: spec.networkName
+          toFieldPath: spec.forProvider.gatewayIdRef.name
+          transforms:
+            - string:
+                fmt: '%s-igw'
+                type: Format
+              type: string
+          type: FromCompositeFieldPath
+      readinessChecks:
+        - matchCondition:
+            status: 'True'
+            type: Ready
+          type: MatchCondition
+
+    - base:
+        apiVersion: ec2.aws.upbound.io/v1beta1
+        kind: RouteTableAssociation
+        spec:
+          forProvider:
+            routeTableIdRef:
+              name: ""
+            subnetIdRef:
+              name: ""
+          providerConfigRef:
+            name: default
+      name: route-table-association-1
+      patches:
+        - fromFieldPath: spec.region
+          toFieldPath: spec.forProvider.region
+          type: FromCompositeFieldPath
+        - fromFieldPath: spec.networkName
+          toFieldPath: metadata.name
+          transforms:
+            - string:
+                fmt: '%s-rt-assoc-1'
+                type: Format
+              type: string
+          type: FromCompositeFieldPath
+        - fromFieldPath: spec.networkName
+          toFieldPath: spec.forProvider.routeTableIdRef.name
+          transforms:
+            - string:
+                fmt: '%s-public-rt'
+                type: Format
+              type: string
+          type: FromCompositeFieldPath
+        - fromFieldPath: spec.networkName
+          toFieldPath: spec.forProvider.subnetIdRef.name
+          transforms:
+            - string:
+                fmt: '%s-subnet-1'
+                type: Format
+              type: string
+          type: FromCompositeFieldPath
+      readinessChecks:
+        - matchCondition:
+            status: 'True'
+            type: Ready
+          type: MatchCondition
+
+    - base:
+        apiVersion: ec2.aws.upbound.io/v1beta1
+        kind: RouteTableAssociation
+        spec:
+          forProvider:
+            routeTableIdRef:
+              name: ""
+            subnetIdRef:
+              name: ""
+          providerConfigRef:
+            name: default
+      name: route-table-association-2
+      patches:
+        - fromFieldPath: spec.region
+          toFieldPath: spec.forProvider.region
+          type: FromCompositeFieldPath
+        - fromFieldPath: spec.networkName
+          toFieldPath: metadata.name
+          transforms:
+            - string:
+                fmt: '%s-rt-assoc-2'
+                type: Format
+              type: string
+          type: FromCompositeFieldPath
+        - fromFieldPath: spec.networkName
+          toFieldPath: spec.forProvider.routeTableIdRef.name
+          transforms:
+            - string:
+                fmt: '%s-public-rt'
+                type: Format
+              type: string
+          type: FromCompositeFieldPath
+        - fromFieldPath: spec.networkName
+          toFieldPath: spec.forProvider.subnetIdRef.name
+          transforms:
+            - string:
+                fmt: '%s-subnet-2'
+                type: Format
+              type: string
+          type: FromCompositeFieldPath
+      readinessChecks:
+        - matchCondition:
+            status: 'True'
+            type: Ready
+          type: MatchCondition
+
+    - base:
+        apiVersion: ec2.aws.upbound.io/v1beta1
+        kind: SecurityGroup
+        spec:
+          forProvider:
+            description: EKS cluster security group
+            tags:
+              ManagedBy: crossplane
+              Environment: ""
+              SecurityGroupType: eks-cluster
+            vpcIdRef:
+              name: ""
+          providerConfigRef:
+            name: default
+      name: security-group
+      patches:
+        - fromFieldPath: spec.region
+          toFieldPath: spec.forProvider.region
+          type: FromCompositeFieldPath
+        - fromFieldPath: spec.networkName
+          toFieldPath: metadata.name
+          transforms:
+            - string:
+                fmt: '%s-sg'
+                type: Format
+              type: string
+          type: FromCompositeFieldPath
+        - fromFieldPath: spec.networkName
+          toFieldPath: spec.forProvider.name
+          transforms:
+            - string:
+                fmt: '%s-sg'
+                type: Format
+              type: string
+          type: FromCompositeFieldPath
+        - fromFieldPath: spec.networkName
+          toFieldPath: spec.forProvider.vpcIdRef.name
+          transforms:
+            - string:
+                fmt: '%s-vpc'
+                type: Format
+              type: string
+          type: FromCompositeFieldPath
+        - fromFieldPath: spec.networkName
+          toFieldPath: spec.forProvider.tags.ManagedBy
+          transforms:
+            - string:
+                fmt: '%s-sg'
+                type: Format
+              type: string
+          type: FromCompositeFieldPath
+        - fromFieldPath: spec.environment
+          toFieldPath: spec.forProvider.tags.Environment
+          type: FromCompositeFieldPath
+      readinessChecks:
+        - matchCondition:
+            status: 'True'
+            type: Ready
+          type: MatchCondition
+      connectionDetails:
+        - fromFieldPath: metadata.annotations["crossplane.io/external-name"]
+          name: security-group-id
+
+    - base:
+        apiVersion: ec2.aws.upbound.io/v1beta1
+        kind: SecurityGroupRule
+        spec:
+          forProvider:
+            type: egress
+            fromPort: -1
+            toPort: -1
+            protocol: "-1"
+            cidrBlocks:
+              - "0.0.0.0/0"
+            securityGroupIdRef:
+              name: ""
+          providerConfigRef:
+            name: default
+      name: security-group-egress
+      patches:
+        - fromFieldPath: spec.region
+          toFieldPath: spec.forProvider.region
+          type: FromCompositeFieldPath
+        - fromFieldPath: spec.networkName
+          toFieldPath: metadata.name
+          transforms:
+            - string:
+                fmt: '%s-sg-egress'
+                type: Format
+              type: string
+          type: FromCompositeFieldPath
+        - fromFieldPath: spec.networkName
+          toFieldPath: spec.forProvider.securityGroupIdRef.name
+          transforms:
+            - string:
+                fmt: '%s-sg'
+                type: Format
+              type: string
+          type: FromCompositeFieldPath
+      readinessChecks:
+        - matchCondition:
+            status: 'True'
+            type: Ready
+          type: MatchCondition
+
+    - base:
+        apiVersion: ec2.aws.upbound.io/v1beta1
+        kind: SecurityGroupRule
+        spec:
+          forProvider:
+            type: ingress
+            fromPort: 443
+            toPort: 443
+            protocol: tcp
+            cidrBlocks:
+              - ""
+            securityGroupIdRef:
+              name: ""
+          providerConfigRef:
+            name: default
+      name: security-group-ingress
+      patches:
+        - fromFieldPath: spec.region
+          toFieldPath: spec.forProvider.region
+          type: FromCompositeFieldPath
+        - fromFieldPath: spec.networkName
+          toFieldPath: metadata.name
+          transforms:
+            - string:
+                fmt: '%s-sg-ingress'
+                type: Format
+              type: string
+          type: FromCompositeFieldPath
+        - fromFieldPath: spec.networkName
+          toFieldPath: spec.forProvider.securityGroupIdRef.name
+          transforms:
+            - string:
+                fmt: '%s-sg'
+                type: Format
+              type: string
+          type: FromCompositeFieldPath
+        - fromFieldPath: spec.allowedCidrs[0]
+          toFieldPath: spec.forProvider.cidrBlocks[0]
+          type: FromCompositeFieldPath
+      readinessChecks:
+        - matchCondition:
+            status: 'True'
+            type: Ready
+          type: MatchCondition
+
+  writeConnectionSecretsToNamespace: crossplane-system

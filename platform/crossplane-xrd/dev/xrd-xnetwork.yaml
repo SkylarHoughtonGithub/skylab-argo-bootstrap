@@ -1,0 +1,81 @@
+---
+apiVersion: apiextensions.crossplane.io/v1
+kind: CompositeResourceDefinition
+metadata:
+  name: xnetworks.infrastructure.skylab.com
+spec:
+  group: infrastructure.skylab.com
+  names:
+    kind: XNetwork
+    plural: xnetworks
+  versions:
+  - name: v1alpha1
+    served: true
+    referenceable: true
+    schema:
+      openAPIV3Schema:
+        type: object
+        properties:
+          spec:
+            type: object
+            properties:
+              networkName:
+                type: string
+                description: "Base name for the network resources"
+              region:
+                type: string
+                description: "AWS region"
+                default: "us-east-2"
+              environment:
+                type: string
+                description: "Environment (dev, staging, prod)"
+                default: dev
+              clusterType:
+                type: string
+                description: "Cluster type (standard, gpu-enabled, etc.)"
+                default: standard
+              vpcCidr:
+                type: string
+                description: "VPC CIDR block"
+                default: "192.168.0.0/16"
+              subnetCidrs:
+                type: array
+                description: "Subnet CIDR blocks"
+                items:
+                  type: string
+                default: ["192.168.10.0/24", "192.168.11.0/24"]
+              allowedCidrs:
+                type: array
+                description: "CIDR blocks allowed access to security group"
+                items:
+                  type: string
+                default: ["68.52.182.6/32"]
+            required:
+              - networkName
+          status:
+            type: object
+            properties:
+              vpcId:
+                type: string
+                description: "VPC ID"
+              igwId:
+                type: string
+                description: "Internet Gateway ID"
+              subnet1Id:
+                type: string
+                description: "Subnet 1 ID"
+              subnet2Id:
+                type: string
+                description: "Subnet 2 ID"
+              routeTableId:
+                type: string
+                description: "Route Table ID"
+              securityGroupId:
+                type: string
+                description: "Security Group ID"
+              vpcCidr:
+                type: string
+                description: "VPC CIDR block"
+  claimNames:
+    kind: Network
+    plural: networks

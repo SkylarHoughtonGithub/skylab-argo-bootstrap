@@ -1,0 +1,432 @@
+apiVersion: apiextensions.crossplane.io/v1
+kind: Composition
+metadata:
+  labels:
+    provider: aws
+    service: eks
+  name: eks-cluster-composition
+spec:
+  compositeTypeRef:
+    apiVersion: infrastructure.skylab.com/v1alpha1
+    kind: XEKSCluster
+  mode: Resources
+  publishConnectionDetailsWithStoreConfigRef:
+    name: default
+  resources:
+    - base:
+        apiVersion: eks.aws.upbound.io/v1beta1
+        kind: Cluster
+        spec:
+          forProvider:
+            vpcConfig:
+              - endpointConfigPrivateAccess: false
+                endpointConfigPublicAccess: true
+                securityGroupIdRefs:
+                  - name: ""
+                subnetIdRefs:
+                  - name: ""
+                  - name: ""
+            tags:
+              ManagedBy: crossplane
+              Environment: ""
+              ClusterType: ""
+              ComponentType: eks-cluster
+          providerConfigRef:
+            name: default
+          writeConnectionSecretToRef:
+            namespace: crossplane-system
+      name: eks-cluster
+      patches:
+        - fromFieldPath: spec.region
+          toFieldPath: spec.forProvider.region
+          type: FromCompositeFieldPath
+        - fromFieldPath: spec.kubernetesVersion
+          toFieldPath: spec.forProvider.version
+          type: FromCompositeFieldPath
+        - fromFieldPath: spec.clusterName
+          toFieldPath: metadata.name
+          type: FromCompositeFieldPath
+        # Reference to RBAC composition connection secret for cluster role
+        - fromFieldPath: spec.clusterName
+          toFieldPath: spec.forProvider.roleArnSelector.matchLabels["rbac.infrastructure.skylab.com/cluster-name"]
+          type: FromCompositeFieldPath
+        - type: FromEnvironmentFieldPath
+          fromFieldPath: clusterRoleArn
+          toFieldPath: spec.forProvider.roleArn
+        # Reference to Network composition resources for VPC config
+        - fromFieldPath: spec.clusterName
+          toFieldPath: spec.forProvider.vpcConfig[0].securityGroupIdSelector.matchLabels["network.infrastructure.skylab.com/cluster-name"]
+          type: FromCompositeFieldPath
+        - fromFieldPath: spec.clusterName
+          toFieldPath: spec.forProvider.vpcConfig[0].subnetIdSelector.matchLabels["network.infrastructure.skylab.com/cluster-name"]
+          type: FromCompositeFieldPath
+        # Alternative: Direct references if using same-namespace resources
+        - fromFieldPath: spec.networkName
+          toFieldPath: spec.forProvider.vpcConfig[0].securityGroupIdRefs[0].name
+          transforms:
+            - string:
+                fmt: '%s-sg'
+                type: Format
+              type: string
+          type: FromCompositeFieldPath
+        - fromFieldPath: spec.networkName
+          toFieldPath: spec.forProvider.vpcConfig[0].subnetIdRefs[0].name
+          transforms:
+            - string:
+                fmt: '%s-subnet-1'
+                type: Format
+              type: string
+          type: FromCompositeFieldPath
+        - fromFieldPath: spec.networkName
+          toFieldPath: spec.forProvider.vpcConfig[0].subnetIdRefs[1].name
+          transforms:
+            - string:
+                fmt: '%s-subnet-2'
+                type: Format
+              type: string
+          type: FromCompositeFieldPath
+        # Cluster tags
+        - fromFieldPath: spec.clusterName
+          toFieldPath: spec.forProvider.tags.ManagedBy
+          type: FromCompositeFieldPath
+        - fromFieldPath: spec.environment
+          toFieldPath: spec.forProvider.tags.Environment
+          type: FromCompositeFieldPath
+        - fromFieldPath: spec.clusterType
+          toFieldPath: spec.forProvider.tags.ClusterType
+          type: FromCompositeFieldPath
+        # Connection secret
+        - fromFieldPath: spec.clusterName
+          toFieldPath: spec.writeConnectionSecretToRef.name
+          transforms:
+            - string:
+                fmt: '%s-cluster-conn'
+                type: Format
+              type: string
+          type: FromCompositeFieldPath
+        # Cluster endpoint access configuration
+        - fromFieldPath: spec.endpointAccess.private
+          toFieldPath: spec.forProvider.vpcConfig[0].endpointConfigPrivateAccess
+          type: FromCompositeFieldPath
+          policy:
+            fromFieldPath: Optional
+        - fromFieldPath: spec.endpointAccess.public
+          toFieldPath: spec.forProvider.vpcConfig[0].endpointConfigPublicAccess
+          type: FromCompositeFieldPath
+          policy:
+            fromFieldPath: Optional
+        - fromFieldPath: spec.endpointAccess.publicAccessCidrs
+          toFieldPath: spec.forProvider.vpcConfig[0].publicAccessCidrs
+          type: FromCompositeFieldPath
+          policy:
+            fromFieldPath: Optional
+      readinessChecks:
+        - matchCondition:
+            status: 'True'
+            type: Ready
+          type: MatchCondition
+      connectionDetails:
+        - fromFieldPath: status.atProvider.endpoint
+          name: cluster-endpoint
+        - fromFieldPath: status.atProvider.certificateAuthority[0].data
+          name: cluster-ca-certificate
+        - fromFieldPath: metadata.name
+          name: cluster-name
+        - fromFieldPath: status.atProvider.arn
+          name: cluster-arn
+
+    - base:
+        apiVersion: eks.aws.upbound.io/v1beta1
+        kind: NodeGroup
+        spec:
+          forProvider:
+            scalingConfig:
+              - minSize: 1
+            subnetIdRefs:
+              - name: ""
+              - name: ""
+            tags:
+              ManagedBy: crossplane
+              Environment: ""
+              ClusterType: ""
+              ComponentType: eks-nodegroup
+          providerConfigRef:
+            name: default
+      name: nodegroup
+      patches:
+        - fromFieldPath: spec.region
+          toFieldPath: spec.forProvider.region
+          type: FromCompositeFieldPath
+        - fromFieldPath: spec.clusterName
+          toFieldPath: metadata.name
+          transforms:
+            - string:
+                fmt: '%s-nodegroup'
+                type: Format
+              type: string
+          type: FromCompositeFieldPath
+        # Reference to the cluster created above
+        - fromFieldPath: spec.clusterName
+          toFieldPath: spec.forProvider.clusterNameRef.name
+          type: FromCompositeFieldPath
+        # Reference to RBAC composition for node role ARN
+        - type: FromEnvironmentFieldPath
+          fromFieldPath: nodeRoleArn
+          toFieldPath: spec.forProvider.nodeRoleArn
+        # Alternative: Direct reference if using same-namespace resources
+        - fromFieldPath: spec.rbacName
+          toFieldPath: spec.forProvider.nodeRoleArnRef.name
+          transforms:
+            - string:
+                fmt: '%s-node-role'
+                type: Format
+              type: string
+          type: FromCompositeFieldPath
+        # Reference to Network composition for subnets
+        - fromFieldPath: spec.networkName
+          toFieldPath: spec.forProvider.subnetIdRefs[0].name
+          transforms:
+            - string:
+                fmt: '%s-subnet-1'
+                type: Format
+              type: string
+          type: FromCompositeFieldPath
+        - fromFieldPath: spec.networkName
+          toFieldPath: spec.forProvider.subnetIdRefs[1].name
+          transforms:
+            - string:
+                fmt: '%s-subnet-2'
+                type: Format
+              type: string
+          type: FromCompositeFieldPath
+        # Node configuration
+        - fromFieldPath: spec.nodeGroup.desiredSize
+          toFieldPath: spec.forProvider.scalingConfig[0].desiredSize
+          type: FromCompositeFieldPath
+        - fromFieldPath: spec.nodeGroup.minSize
+          toFieldPath: spec.forProvider.scalingConfig[0].minSize
+          type: FromCompositeFieldPath
+        - fromFieldPath: spec.nodeGroup.maxSize
+          toFieldPath: spec.forProvider.scalingConfig[0].maxSize
+          type: FromCompositeFieldPath
+        - fromFieldPath: spec.nodeGroup.instanceTypes
+          toFieldPath: spec.forProvider.instanceTypes
+          type: FromCompositeFieldPath
+        - fromFieldPath: spec.nodeGroup.capacityType
+          toFieldPath: spec.forProvider.capacityType
+          type: FromCompositeFieldPath
+          policy:
+            fromFieldPath: Optional
+        - fromFieldPath: spec.nodeGroup.amiType
+          toFieldPath: spec.forProvider.amiType
+          type: FromCompositeFieldPath
+          policy:
+            fromFieldPath: Optional
+        - fromFieldPath: spec.nodeGroup.diskSize
+          toFieldPath: spec.forProvider.diskSize
+          type: FromCompositeFieldPath
+          policy:
+            fromFieldPath: Optional
+        # Labels and taints
+        - fromFieldPath: spec.nodeGroup.labels
+          toFieldPath: spec.forProvider.labels
+          type: FromCompositeFieldPath
+          policy:
+            fromFieldPath: Optional
+        - fromFieldPath: spec.nodeGroup.taints
+          toFieldPath: spec.forProvider.taint
+          type: FromCompositeFieldPath
+          policy:
+            fromFieldPath: Optional
+        # Tags
+        - fromFieldPath: spec.clusterName
+          toFieldPath: spec.forProvider.tags.ManagedBy
+          transforms:
+            - string:
+                fmt: '%s-nodegroup'
+                type: Format
+              type: string
+          type: FromCompositeFieldPath
+        - fromFieldPath: spec.environment
+          toFieldPath: spec.forProvider.tags.Environment
+          type: FromCompositeFieldPath
+        - fromFieldPath: spec.clusterType
+          toFieldPath: spec.forProvider.tags.ClusterType
+          type: FromCompositeFieldPath
+        # Update policy
+        - fromFieldPath: spec.nodeGroup.updateConfig.maxUnavailable
+          toFieldPath: spec.forProvider.updateConfig[0].maxUnavailable
+          type: FromCompositeFieldPath
+          policy:
+            fromFieldPath: Optional
+        - fromFieldPath: spec.nodeGroup.updateConfig.maxUnavailablePercentage
+          toFieldPath: spec.forProvider.updateConfig[0].maxUnavailablePercentage
+          type: FromCompositeFieldPath
+          policy:
+            fromFieldPath: Optional
+      readinessChecks:
+        - matchCondition:
+            status: 'True'
+            type: Ready
+          type: MatchCondition
+      connectionDetails:
+        - fromFieldPath: status.atProvider.arn
+          name: nodegroup-arn
+        - fromFieldPath: metadata.name
+          name: nodegroup-name
+
+    # Optional: EKS Add-ons
+    - base:
+        apiVersion: eks.aws.upbound.io/v1beta1
+        kind: Addon
+        spec:
+          forProvider:
+            addonName: vpc-cni
+            clusterNameRef:
+              name: ""
+            resolveConflicts: OVERWRITE
+            tags:
+              ManagedBy: crossplane
+              AddonType: vpc-cni
+          providerConfigRef:
+            name: default
+      name: vpc-cni-addon
+      patches:
+        - fromFieldPath: spec.region
+          toFieldPath: spec.forProvider.region
+          type: FromCompositeFieldPath
+        - fromFieldPath: spec.clusterName
+          toFieldPath: metadata.name
+          transforms:
+            - string:
+                fmt: '%s-vpc-cni-addon'
+                type: Format
+              type: string
+          type: FromCompositeFieldPath
+        - fromFieldPath: spec.clusterName
+          toFieldPath: spec.forProvider.clusterNameRef.name
+          type: FromCompositeFieldPath
+        - fromFieldPath: spec.addons.vpcCni.version
+          toFieldPath: spec.forProvider.addonVersion
+          type: FromCompositeFieldPath
+          policy:
+            fromFieldPath: Optional
+        - fromFieldPath: spec.addons.vpcCni.enabled
+          toFieldPath: metadata.annotations["crossplane.io/external-name"]
+          transforms:
+            - type: map
+              map:
+                "true": "enabled"
+                "false": "disabled"
+          type: FromCompositeFieldPath
+          policy:
+            fromFieldPath: Optional
+      readinessChecks:
+        - matchCondition:
+            status: 'True'
+            type: Ready
+          type: MatchCondition
+
+    - base:
+        apiVersion: eks.aws.upbound.io/v1beta1
+        kind: Addon
+        spec:
+          forProvider:
+            addonName: coredns
+            clusterNameRef:
+              name: ""
+            resolveConflicts: OVERWRITE
+            tags:
+              ManagedBy: crossplane
+              AddonType: coredns
+          providerConfigRef:
+            name: default
+      name: coredns-addon
+      patches:
+        - fromFieldPath: spec.region
+          toFieldPath: spec.forProvider.region
+          type: FromCompositeFieldPath
+        - fromFieldPath: spec.clusterName
+          toFieldPath: metadata.name
+          transforms:
+            - string:
+                fmt: '%s-coredns-addon'
+                type: Format
+              type: string
+          type: FromCompositeFieldPath
+        - fromFieldPath: spec.clusterName
+          toFieldPath: spec.forProvider.clusterNameRef.name
+          type: FromCompositeFieldPath
+        - fromFieldPath: spec.addons.coreDns.version
+          toFieldPath: spec.forProvider.addonVersion
+          type: FromCompositeFieldPath
+          policy:
+            fromFieldPath: Optional
+        - fromFieldPath: spec.addons.coreDns.enabled
+          toFieldPath: metadata.annotations["crossplane.io/external-name"]
+          transforms:
+            - type: map
+              map:
+                "true": "enabled"
+                "false": "disabled"
+          type: FromCompositeFieldPath
+          policy:
+            fromFieldPath: Optional
+      readinessChecks:
+        - matchCondition:
+            status: 'True'
+            type: Ready
+          type: MatchCondition
+
+    - base:
+        apiVersion: eks.aws.upbound.io/v1beta1
+        kind: Addon
+        spec:
+          forProvider:
+            addonName: kube-proxy
+            clusterNameRef:
+              name: ""
+            resolveConflicts: OVERWRITE
+            tags:
+              ManagedBy: crossplane
+              AddonType: kube-proxy
+          providerConfigRef:
+            name: default
+      name: kube-proxy-addon
+      patches:
+        - fromFieldPath: spec.region
+          toFieldPath: spec.forProvider.region
+          type: FromCompositeFieldPath
+        - fromFieldPath: spec.clusterName
+          toFieldPath: metadata.name
+          transforms:
+            - string:
+                fmt: '%s-kube-proxy-addon'
+                type: Format
+              type: string
+          type: FromCompositeFieldPath
+        - fromFieldPath: spec.clusterName
+          toFieldPath: spec.forProvider.clusterNameRef.name
+          type: FromCompositeFieldPath
+        - fromFieldPath: spec.addons.kubeProxy.version
+          toFieldPath: spec.forProvider.addonVersion
+          type: FromCompositeFieldPath
+          policy:
+            fromFieldPath: Optional
+        - fromFieldPath: spec.addons.kubeProxy.enabled
+          toFieldPath: metadata.annotations["crossplane.io/external-name"]
+          transforms:
+            - type: map
+              map:
+                "true": "enabled"
+                "false": "disabled"
+          type: FromCompositeFieldPath
+          policy:
+            fromFieldPath: Optional
+      readinessChecks:
+        - matchCondition:
+            status: 'True'
+            type: Ready
+          type: MatchCondition
+
+  writeConnectionSecretsToNamespace: crossplane-system

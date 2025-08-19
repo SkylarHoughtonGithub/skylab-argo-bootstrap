@@ -1,0 +1,76 @@
+apiVersion: apiextensions.crossplane.io/v1
+kind: CompositeResourceDefinition
+metadata:
+  name: xclusterrbacs.infrastructure.skylab.com
+spec:
+  group: infrastructure.skylab.com
+  names:
+    kind: XClusterRBAC
+    plural: xclusterrbacs
+  versions:
+  - name: v1alpha1
+    served: true
+    referenceable: true
+    schema:
+      openAPIV3Schema:
+        type: object
+        properties:
+          spec:
+            type: object
+            properties:
+              clusterName:
+                type: string
+                description: "Name of the EKS cluster for RBAC resources"
+              environment:
+                type: string
+                description: "Environment (dev, staging, prod)"
+                default: dev
+              includeEbsCsiPolicy:
+                type: boolean
+                description: "Whether to include EBS CSI driver policy for node role"
+                default: true
+              customPolicies:
+                type: array
+                description: "Additional custom policy ARNs to attach to node role"
+                items:
+                  type: object
+                  properties:
+                    name:
+                      type: string
+                      description: "Name for the policy attachment"
+                    arn:
+                      type: string
+                      description: "ARN of the policy to attach"
+                    roleType:
+                      type: string
+                      description: "Which role to attach to (cluster or node)"
+                      enum: ["cluster", "node"]
+                      default: "node"
+                  required:
+                    - name
+                    - arn
+            required:
+              - clusterName
+          status:
+            type: object
+            properties:
+              clusterRoleArn:
+                type: string
+                description: "ARN of the EKS cluster service role"
+              nodeRoleArn:
+                type: string
+                description: "ARN of the EKS node group role"
+              clusterRoleName:
+                type: string
+                description: "Name of the EKS cluster service role"
+              nodeRoleName:
+                type: string
+                description: "Name of the EKS node group role"
+              attachedPolicies:
+                type: array
+                description: "List of attached policy ARNs"
+                items:
+                  type: string
+  claimNames:
+    kind: ClusterRBAC
+    plural: clusterrbacs
