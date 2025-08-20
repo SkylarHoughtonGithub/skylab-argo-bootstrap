@@ -13,6 +13,7 @@ spec:
   publishConnectionDetailsWithStoreConfigRef:
     name: default
   resources:
+    # Admin Access Entry (Optional)
     - base:
         apiVersion: eks.aws.upbound.io/v1beta1
         kind: AccessEntry
@@ -28,7 +29,7 @@ spec:
               name: ""
           providerConfigRef:
             name: default
-      name: admin-access-entry-1
+      name: admin-access-entry
       patches:
         - fromFieldPath: spec.region
           toFieldPath: spec.forProvider.region
@@ -37,7 +38,7 @@ spec:
           toFieldPath: metadata.name
           transforms:
             - string:
-                fmt: '%s-admin-1'
+                fmt: '%s-admin-access-entry'
                 type: Format
               type: string
           type: FromCompositeFieldPath
@@ -48,25 +49,26 @@ spec:
           combine:
             variables:
               - fromFieldPath: spec.awsAccountId
-              - fromFieldPath: spec.adminPrincipals[0].type
-              - fromFieldPath: spec.adminPrincipals[0].name
+              - fromFieldPath: spec.adminPrincipal.type
+              - fromFieldPath: spec.adminPrincipal.name
             strategy: string
             string:
               fmt: "arn:aws:iam::%s:%s/%s"
           toFieldPath: spec.forProvider.principalArn
           policy:
             fromFieldPath: Optional
-        - fromFieldPath: spec.adminPrincipals[0].type
+        - fromFieldPath: spec.adminPrincipal.type
           toFieldPath: spec.forProvider.tags.PrincipalType
           type: FromCompositeFieldPath
           policy:
             fromFieldPath: Optional
-      readinessChecks:	
-        - matchCondition:	
-            status: 'True'	
-            type: Ready	
+      readinessChecks:
+        - matchCondition:
+            status: 'True'
+            type: Ready
           type: MatchCondition
 
+    # Admin Access Policy Association (Optional)
     - base:
         apiVersion: eks.aws.upbound.io/v1beta1
         kind: AccessPolicyAssociation
@@ -80,7 +82,7 @@ spec:
               name: ""
           providerConfigRef:
             name: default
-      name: admin-policy-association-1
+      name: admin-policy-association
       patches:
         - fromFieldPath: spec.region
           toFieldPath: spec.forProvider.region
@@ -89,7 +91,7 @@ spec:
           toFieldPath: metadata.name
           transforms:
             - string:
-                fmt: '%s-admin-policy-1'
+                fmt: '%s-admin-policy-association'
                 type: Format
               type: string
           type: FromCompositeFieldPath
@@ -100,121 +102,21 @@ spec:
           combine:
             variables:
               - fromFieldPath: spec.awsAccountId
-              - fromFieldPath: spec.adminPrincipals[0].type
-              - fromFieldPath: spec.adminPrincipals[0].name
+              - fromFieldPath: spec.adminPrincipal.type
+              - fromFieldPath: spec.adminPrincipal.name
             strategy: string
             string:
               fmt: "arn:aws:iam::%s:%s/%s"
           toFieldPath: spec.forProvider.principalArn
           policy:
             fromFieldPath: Optional
-      readinessChecks:	
-        - matchCondition:	
-            status: 'True'	
-            type: Ready	
+      readinessChecks:
+        - matchCondition:
+            status: 'True'
+            type: Ready
           type: MatchCondition
 
-    - base:
-        apiVersion: eks.aws.upbound.io/v1beta1
-        kind: AccessEntry
-        spec:
-          forProvider:
-            principalArn: ""
-            type: STANDARD
-            tags:
-              ManagedBy: crossplane
-              AccessType: admin
-              PrincipalType: ""
-            clusterNameRef:
-              name: ""
-          providerConfigRef:
-            name: default
-      name: admin-access-entry-2
-      patches:
-        - fromFieldPath: spec.region
-          toFieldPath: spec.forProvider.region
-          type: FromCompositeFieldPath
-        - fromFieldPath: spec.clusterName
-          toFieldPath: metadata.name
-          transforms:
-            - string:
-                fmt: '%s-admin-2'
-                type: Format
-              type: string
-          type: FromCompositeFieldPath
-        - fromFieldPath: spec.clusterName
-          toFieldPath: spec.forProvider.clusterNameRef.name
-          type: FromCompositeFieldPath
-        - type: CombineFromComposite
-          combine:
-            variables:
-              - fromFieldPath: spec.awsAccountId
-              - fromFieldPath: spec.adminPrincipals[1].type
-              - fromFieldPath: spec.adminPrincipals[1].name
-            strategy: string
-            string:
-              fmt: "arn:aws:iam::%s:%s/%s"
-          toFieldPath: spec.forProvider.principalArn
-          policy:
-            fromFieldPath: Optional
-        - fromFieldPath: spec.adminPrincipals[1].type
-          toFieldPath: spec.forProvider.tags.PrincipalType
-          type: FromCompositeFieldPath
-          policy:
-            fromFieldPath: Optional
-      readinessChecks:	
-        - matchCondition:	
-            status: 'True'	
-            type: Ready	
-          type: MatchCondition
-
-    - base:
-        apiVersion: eks.aws.upbound.io/v1beta1
-        kind: AccessPolicyAssociation
-        spec:
-          forProvider:
-            accessScope:
-              - type: cluster
-            policyArn: arn:aws:eks::aws:cluster-access-policy/AmazonEKSClusterAdminPolicy
-            principalArn: ""
-            clusterNameRef:
-              name: ""
-          providerConfigRef:
-            name: default
-      name: admin-policy-association-2
-      patches:
-        - fromFieldPath: spec.region
-          toFieldPath: spec.forProvider.region
-          type: FromCompositeFieldPath
-        - fromFieldPath: spec.clusterName
-          toFieldPath: metadata.name
-          transforms:
-            - string:
-                fmt: '%s-admin-policy-2'
-                type: Format
-              type: string
-          type: FromCompositeFieldPath
-        - fromFieldPath: spec.clusterName
-          toFieldPath: spec.forProvider.clusterNameRef.name
-          type: FromCompositeFieldPath
-        - type: CombineFromComposite
-          combine:
-            variables:
-              - fromFieldPath: spec.awsAccountId
-              - fromFieldPath: spec.adminPrincipals[1].type
-              - fromFieldPath: spec.adminPrincipals[1].name
-            strategy: string
-            string:
-              fmt: "arn:aws:iam::%s:%s/%s"
-          toFieldPath: spec.forProvider.principalArn
-          policy:
-            fromFieldPath: Optional
-      readinessChecks:	
-        - matchCondition:	
-            status: 'True'	
-            type: Ready	
-          type: MatchCondition
-
+    # ReadOnly Access Entry (Optional)
     - base:
         apiVersion: eks.aws.upbound.io/v1beta1
         kind: AccessEntry
@@ -230,7 +132,7 @@ spec:
               name: ""
           providerConfigRef:
             name: default
-      name: readonly-access-entry-1
+      name: readonly-access-entry
       patches:
         - fromFieldPath: spec.region
           toFieldPath: spec.forProvider.region
@@ -239,7 +141,7 @@ spec:
           toFieldPath: metadata.name
           transforms:
             - string:
-                fmt: '%s-readonly-1'
+                fmt: '%s-readonly-access-entry'
                 type: Format
               type: string
           type: FromCompositeFieldPath
@@ -250,25 +152,26 @@ spec:
           combine:
             variables:
               - fromFieldPath: spec.awsAccountId
-              - fromFieldPath: spec.readonlyPrincipals[0].type
-              - fromFieldPath: spec.readonlyPrincipals[0].name
+              - fromFieldPath: spec.readonlyPrincipal.type
+              - fromFieldPath: spec.readonlyPrincipal.name
             strategy: string
             string:
               fmt: "arn:aws:iam::%s:%s/%s"
           toFieldPath: spec.forProvider.principalArn
           policy:
             fromFieldPath: Optional
-        - fromFieldPath: spec.readonlyPrincipals[0].type
+        - fromFieldPath: spec.readonlyPrincipal.type
           toFieldPath: spec.forProvider.tags.PrincipalType
           type: FromCompositeFieldPath
           policy:
             fromFieldPath: Optional
-      readinessChecks:	
-        - matchCondition:	
-            status: 'True'	
-            type: Ready	
+      readinessChecks:
+        - matchCondition:
+            status: 'True'
+            type: Ready
           type: MatchCondition
 
+    # ReadOnly Access Policy Association (Optional)
     - base:
         apiVersion: eks.aws.upbound.io/v1beta1
         kind: AccessPolicyAssociation
@@ -282,7 +185,7 @@ spec:
               name: ""
           providerConfigRef:
             name: default
-      name: readonly-policy-association-1
+      name: readonly-policy-association
       patches:
         - fromFieldPath: spec.region
           toFieldPath: spec.forProvider.region
@@ -291,7 +194,7 @@ spec:
           toFieldPath: metadata.name
           transforms:
             - string:
-                fmt: '%s-readonly-policy-1'
+                fmt: '%s-readonly-policy-association'
                 type: Format
               type: string
           type: FromCompositeFieldPath
@@ -302,119 +205,18 @@ spec:
           combine:
             variables:
               - fromFieldPath: spec.awsAccountId
-              - fromFieldPath: spec.readonlyPrincipals[0].type
-              - fromFieldPath: spec.readonlyPrincipals[0].name
+              - fromFieldPath: spec.readonlyPrincipal.type
+              - fromFieldPath: spec.readonlyPrincipal.name
             strategy: string
             string:
               fmt: "arn:aws:iam::%s:%s/%s"
           toFieldPath: spec.forProvider.principalArn
           policy:
             fromFieldPath: Optional
-      readinessChecks:	
-        - matchCondition:	
-            status: 'True'	
-            type: Ready	
-          type: MatchCondition
-
-    - base:
-        apiVersion: eks.aws.upbound.io/v1beta1
-        kind: AccessEntry
-        spec:
-          forProvider:
-            principalArn: ""
-            type: STANDARD
-            tags:
-              ManagedBy: crossplane
-              AccessType: readonly
-              PrincipalType: ""
-            clusterNameRef:
-              name: ""
-          providerConfigRef:
-            name: default
-      name: readonly-access-entry-2
-      patches:
-        - fromFieldPath: spec.region
-          toFieldPath: spec.forProvider.region
-          type: FromCompositeFieldPath
-        - fromFieldPath: spec.clusterName
-          toFieldPath: metadata.name
-          transforms:
-            - string:
-                fmt: '%s-readonly-2'
-                type: Format
-              type: string
-          type: FromCompositeFieldPath
-        - fromFieldPath: spec.clusterName
-          toFieldPath: spec.forProvider.clusterNameRef.name
-          type: FromCompositeFieldPath
-        - type: CombineFromComposite
-          combine:
-            variables:
-              - fromFieldPath: spec.awsAccountId
-              - fromFieldPath: spec.readonlyPrincipals[1].type
-              - fromFieldPath: spec.readonlyPrincipals[1].name
-            strategy: string
-            string:
-              fmt: "arn:aws:iam::%s:%s/%s"
-          toFieldPath: spec.forProvider.principalArn
-          policy:
-            fromFieldPath: Optional
-        - fromFieldPath: spec.readonlyPrincipals[1].type
-          toFieldPath: spec.forProvider.tags.PrincipalType
-          type: FromCompositeFieldPath
-          policy:
-            fromFieldPath: Optional
-      readinessChecks:	
-        - matchCondition:	
-            status: 'True'	
-            type: Ready	
-          type: MatchCondition
-
-    - base:
-        apiVersion: eks.aws.upbound.io/v1beta1
-        kind: AccessPolicyAssociation
-        spec:
-          forProvider:
-            accessScope:
-              - type: cluster
-            policyArn: arn:aws:eks::aws:cluster-access-policy/AmazonEKSAdminViewPolicy
-            principalArn: ""
-            clusterNameRef:
-              name: ""
-          providerConfigRef:
-            name: default
-      name: readonly-policy-association-2
-      patches:
-        - fromFieldPath: spec.region
-          toFieldPath: spec.forProvider.region
-          type: FromCompositeFieldPath
-        - fromFieldPath: spec.clusterName
-          toFieldPath: metadata.name
-          transforms:
-            - string:
-                fmt: '%s-readonly-policy-2'
-                type: Format
-              type: string
-          type: FromCompositeFieldPath
-        - fromFieldPath: spec.clusterName
-          toFieldPath: spec.forProvider.clusterNameRef.name
-          type: FromCompositeFieldPath
-        - type: CombineFromComposite
-          combine:
-            variables:
-              - fromFieldPath: spec.awsAccountId
-              - fromFieldPath: spec.readonlyPrincipals[1].type
-              - fromFieldPath: spec.readonlyPrincipals[1].name
-            strategy: string
-            string:
-              fmt: "arn:aws:iam::%s:%s/%s"
-          toFieldPath: spec.forProvider.principalArn
-          policy:
-            fromFieldPath: Optional
-      readinessChecks:	
-        - matchCondition:	
-            status: 'True'	
-            type: Ready	
+      readinessChecks:
+        - matchCondition:
+            status: 'True'
+            type: Ready
           type: MatchCondition
 
   writeConnectionSecretsToNamespace: crossplane-system
