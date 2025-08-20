@@ -31,191 +31,102 @@ spec:
                 pattern: "^[0-9]{12}$"
                 default: "635314249418"
               
-              # Admin principals with full cluster access
-              adminPrincipals:
-                type: array
-                description: "List of IAM principals to grant admin access (max 2)"
-                maxItems: 2
-                items:
-                  type: object
-                  properties:
-                    name:
-                      type: string
-                      description: "Name of IAM user or role"
-                    type:
-                      type: string
-                      enum: ["user", "role"]
-                      default: "role"
-                      description: "Type of IAM principal"
-                    kubernetesGroups:
-                      type: array
-                      description: "Kubernetes groups to assign"
-                      items:
-                        type: string
-                      default: ["system:masters"]
-                    accessPolicies:
-                      type: array
-                      description: "EKS access policies to attach"
-                      items:
-                        type: object
-                        properties:
-                          policyArn:
-                            type: string
-                            description: "ARN of the EKS access policy"
-                          accessScope:
-                            type: object
-                            description: "Scope of the access policy"
-                            properties:
-                              type:
-                                type: string
-                                enum: ["cluster", "namespace"]
-                                default: "cluster"
-                              namespaces:
-                                type: array
-                                items:
-                                  type: string
-                        required:
-                          - policyArn
-                  required:
-                    - name
+              # Admin principals with full cluster access via AmazonEKSClusterAdminPolicy
+              adminPrapiVersion: apiextensions.crossplane.io/v1
+kind: CompositeResourceDefinition
+metadata:
+  name: xeksaccessentries.infrastructure.skylab.com
+spec:
+  group: infrastructure.skylab.com
+  names:
+    kind: XEKSAccessEntries
+    plural: xeksaccessentries
+  versions:
+  - name: v1alpha1
+    served: true
+    referenceable: true
+    schema:
+      openAPIV3Schema:
+        type: object
+        properties:
+          spec:
+            type: object
+            properties:
+              clusterName:
+                type: string
+                description: "Name of the EKS cluster to grant access to"
+              region:
+                type: string
+                description: "AWS region"
+                default: "us-east-2"
+              awsAccountId:
+                type: string
+                description: "AWS Account ID for constructing IAM ARNs"
+                pattern: "^[0-9]{12}$"
+                default: "635314249418"
               
-              # Developer principals with namespace-scoped access
-              developerPrincipals:
-                type: array
-                description: "List of IAM principals to grant developer access (max 2)"
-                maxItems: 2
-                items:
-                  type: object
-                  properties:
-                    name:
-                      type: string
-                      description: "Name of IAM user or role"
-                    type:
-                      type: string
-                      enum: ["user", "role"]
-                      default: "role"
-                      description: "Type of IAM principal"
-                    kubernetesGroups:
-                      type: array
-                      description: "Kubernetes groups to assign"
-                      items:
-                        type: string
-                      default: ["system:authenticated"]
-                    accessPolicies:
-                      type: array
-                      description: "EKS access policies to attach"
-                      items:
-                        type: object
-                        properties:
-                          policyArn:
-                            type: string
-                            description: "ARN of the EKS access policy"
-                          accessScope:
-                            type: object
-                            description: "Scope of the access policy"
-                            properties:
-                              type:
-                                type: string
-                                enum: ["cluster", "namespace"]
-                                default: "namespace"
-                              namespaces:
-                                type: array
-                                items:
-                                  type: string
-                        required:
-                          - policyArn
-                  required:
-                    - name
+              # Single admin principal with AmazonEKSClusterAdminPolicy
+              adminPrincipal:
+                type: object
+                description: "IAM principal to grant admin access"
+                properties:
+                  name:
+                    type: string
+                    description: "Name of IAM user or role"
+                  type:
+                    type: string
+                    enum: ["user", "role"]
+                    default: "role"
+                    description: "Type of IAM principal"
+                required:
+                  - name
               
-              # ReadOnly principals with read-only access
-              readonlyPrincipals:
-                type: array
-                description: "List of IAM principals to grant readonly access (max 2)"
-                maxItems: 2
-                items:
-                  type: object
-                  properties:
-                    name:
-                      type: string
-                      description: "Name of IAM user or role"
-                    type:
-                      type: string
-                      enum: ["user", "role"]
-                      default: "role"
-                      description: "Type of IAM principal"
-                    kubernetesGroups:
-                      type: array
-                      description: "Kubernetes groups to assign"
-                      items:
-                        type: string
-                      default: ["system:authenticated"]
-                    accessPolicies:
-                      type: array
-                      description: "EKS access policies to attach"
-                      items:
-                        type: object
-                        properties:
-                          policyArn:
-                            type: string
-                            description: "ARN of the EKS access policy"
-                            default: "arn:aws:eks::aws:cluster-access-policy/AmazonEKSViewPolicy"
-                          accessScope:
-                            type: object
-                            description: "Scope of the access policy"
-                            properties:
-                              type:
-                                type: string
-                                enum: ["cluster", "namespace"]
-                                default: "cluster"
-                              namespaces:
-                                type: array
-                                items:
-                                  type: string
-                        required:
-                          - policyArn
-                  required:
-                    - name
+              # Single readonly principal with AmazonEKSAdminViewPolicy
+              readonlyPrincipal:
+                type: object
+                description: "IAM principal to grant readonly access"
+                properties:
+                  name:
+                    type: string
+                    description: "Name of IAM user or role"
+                  type:
+                    type: string
+                    enum: ["user", "role"]
+                    default: "role"
+                    description: "Type of IAM principal"
+                required:
+                  - name
             required:
               - clusterName
           status:
             type: object
             properties:
-              adminEntries:
-                type: array
-                description: "Status of admin access entries"
-                items:
-                  type: object
-                  properties:
-                    principalArn:
-                      type: string
-                    status:
-                      type: string
-                    accessEntryArn:
-                      type: string
-              developerEntries:
-                type: array
-                description: "Status of developer access entries"
-                items:
-                  type: object
-                  properties:
-                    principalArn:
-                      type: string
-                    status:
-                      type: string
-                    accessEntryArn:
-                      type: string
-              readonlyEntries:
-                type: array
-                description: "Status of readonly access entries"
-                items:
-                  type: object
-                  properties:
-                    principalArn:
-                      type: string
-                    status:
-                      type: string
-                    accessEntryArn:
-                      type: string
+              adminEntry:
+                type: object
+                description: "Status of admin access entry"
+                properties:
+                  principalArn:
+                    type: string
+                  status:
+                    type: string
+                  accessEntryArn:
+                    type: string
+                  policyArn:
+                    type: string
+                    default: "arn:aws:eks::aws:cluster-access-policy/AmazonEKSClusterAdminPolicy"
+              readonlyEntry:
+                type: object
+                description: "Status of readonly access entry"
+                properties:
+                  principalArn:
+                    type: string
+                  status:
+                    type: string
+                  accessEntryArn:
+                    type: string
+                  policyArn:
+                    type: string
+                    default: "arn:aws:eks::aws:cluster-access-policy/AmazonEKSAdminViewPolicy"
   claimNames:
     kind: EKSAccessEntries
     plural: eksaccessentries
