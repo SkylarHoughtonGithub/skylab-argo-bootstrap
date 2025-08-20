@@ -75,7 +75,7 @@ spec:
         spec:
           forProvider:
             accessScope:
-              - type: cluster
+              type: cluster
             policyArn: arn:aws:eks::aws:cluster-access-policy/AmazonEKSClusterAdminPolicy
             principalArn: ""
             clusterNameRef:
@@ -178,7 +178,7 @@ spec:
         spec:
           forProvider:
             accessScope:
-              - type: cluster
+              type: cluster
             policyArn: arn:aws:eks::aws:cluster-access-policy/AmazonEKSAdminViewPolicy
             principalArn: ""
             clusterNameRef:
