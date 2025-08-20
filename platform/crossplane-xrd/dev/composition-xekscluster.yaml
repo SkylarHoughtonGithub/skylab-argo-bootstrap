@@ -19,8 +19,8 @@ spec:
         spec:
           forProvider:
             accessConfig:
-              authenticationMode: API_AND_CONFIG_MAP
-              bootstrapClusterCreatorAdminPermissions: true
+              - authenticationMode: API_AND_CONFIG_MAP
+                bootstrapClusterCreatorAdminPermissions: true
             vpcConfig:
               - endpointConfigPrivateAccess: false
                 endpointConfigPublicAccess: true
