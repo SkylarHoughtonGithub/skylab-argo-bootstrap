@@ -107,8 +107,8 @@ spec:
                   amiType:
                     type: string
                     description: "AMI type for nodes"
-                    enum: ["AL2_x86_64", "AL2_x86_64_GPU", "AL2_ARM_64", "CUSTOM", "BOTTLEROCKET_ARM_64", "BOTTLEROCKET_x86_64"]
-                    default: "AL2_x86_64"
+                    enum: ["AL2023_x86_64_STANDARD", "AL2_x86_64", "AL2_x86_64_GPU", "AL2_ARM_64", "CUSTOM", "BOTTLEROCKET_ARM_64", "BOTTLEROCKET_x86_64"]
+                    default: "AL2023_x86_64_STANDARD"
                   diskSize:
                     type: integer
                     description: "Node disk size in GB"
