@@ -16,6 +16,11 @@ helmCharts:
   repo: https://smallstep.github.io/helm-charts
   valuesFile: step-issuer-values.yaml
   version: 1.9.8
+- name: trust-manager
+  namespace: cert-manager
+  releaseName: trust-manager
+  repo: https://charts.jetstack.io
+  version: 0.19.0
 labels:
 - includeSelectors: true
   pairs:
